@@ -13,12 +13,9 @@ Framework PHP minimal et autonome basé sur **PSR-7/PSR-15** avec middleware, se
 - **Routing** — League Route avec DI automatique  
 - **Base de données** — PDO wrapper (MyPDO) avec hydration entités, casting de types  
 - **Logs PSR-3** — Monolog avec Whoops (dev) et erreurs 500 propres (prod)  
-<<<<<<< HEAD
-=======
 - **Mailing** — PHPMailer avec MailerFactory configurable par env  
 - **Formulaires** — Validation, hydratation d'entités, rendu HTML sécurisé  
 - **Vues** — Moteur templates PHP natif avec layouts et contexte partagé  
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 - **Qualité** — PHPStan niveau 6, PHP-CS-Fixer, PHPUnit, PHPDoc Doxygen-compatible
 
 ## Démarrage rapide
@@ -191,8 +188,6 @@ DB_USER=app
 DB_PASSWORD=your_secure_password
 LOG_FILE=var/log/app.log
 CSRF_EXEMPTIONS=/api/*,/webhook/*
-<<<<<<< HEAD
-=======
 SMTP_HOST=mailpit
 SMTP_PORT=1025
 SMTP_AUTH=0
@@ -203,7 +198,6 @@ SMTP_AUTO_TLS=0
 SMTP_DEBUG=0
 SMTP_FROM_EMAIL=no-reply@example.test
 SMTP_FROM_NAME=Koabana
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 ```
 
 ### Variables clés
@@ -212,81 +206,6 @@ SMTP_FROM_NAME=Koabana
 | `APP_ENV` | `dev` | `dev` = Whoops actif, HSTS désactivé; `prod` = erreurs génériques |
 | `DB_DSN` | — | PDO DSN (MySQL, SQLite, etc.) |
 | `LOG_LEVEL` | `debug` | Niveau Monolog (debug, info, warning, error) |
-<<<<<<< HEAD
-
-## Sécurité
-
-### Sessions
-- HttpOnly (pas d'accès JS)
-- SameSite=Lax (CSRF léger)
-- Secure=conditionnel (HTTPS en prod)
-
-### CSRF
-- Token généré par session (64 chars hexadécimales)
-- Validation sur POST/PUT/PATCH/DELETE
-- Exemptions paramétrables (`/api/*`, `/webhook/*`)
-
-### Headers HTTP
-- CSP (Content-Security-Policy)
-- X-Frame-Options: DENY
-- HSTS (strict-transport-security) — HTTPS+prod uniquement
-- Referrer-Policy: strict-origin-when-cross-origin
-
-## API Sessions (Bags)
-
-### SessionBag (données session génériques)
-```php
-$session->set('key', ['data' => 'value']);
-$data = $session->get('key', []);
-$session->has('key');
-$session->remove('key');
-$session->all();
-$session->clear();
-```
-
-### FlashBag (messages jetables)
-```php
-$flash->add('success', 'Opération réussie !');
-$flash->add('error', 'Une erreur s\'est produite.');
-$messages = $flash->all();  // Récupère et efface
-$flash->get('success');     // Une seule catégorie
-$flash->has('error');
-```
-
-### ProfileBag (profil utilisateur)
-```php
-$profile->isLogged();
-$profile->getId();
-$profile->getFirstname();
-$profile->getEmail();
-$profile->set(['user_id' => 1, 'user_firstname' => 'Alice']);
-$profile->clear();
-$profile->toArray();
-```
-
-## Tests & Démo
-
-Visitez `/demo/tests` pour explorer SessionBag, ProfileBag, FlashBag.
-
-Routes de test :
-- `GET /demo` — Page principale
-- `GET /demo/form` — Formulaire CSRF demo
-- `POST /demo/submit` — Traitement CSRF
-- `GET /demo/tests` — Tests interactifs Bags
-- `GET /demo/session/set` — Définir données session
-- `GET /demo/session/get` — Récupérer données
-- `GET /demo/profile/set` — Définir profil utilisateur
-- `GET /demo/profile/get` — Récupérer profil
-- `GET /demo/flash/add` — Ajouter message flash
-
-## Prochaines étapes
-
-- **AbstractRepository** → Implémentation CRUD complet
-- **Système de formulaire** → Validation, binding, rendu HTML
-
-## Support & Contributions
-
-=======
 | `SMTP_HOST` | — | Hote SMTP (ex: mailpit, smtp.gmail.com) |
 | `SMTP_PORT` | `25` | Port SMTP |
 | `SMTP_AUTH` | `0` | Auth SMTP (1/0) |
@@ -404,14 +323,10 @@ Documentation complète pour chaque module :
 
 ## Support & Contributions
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 Pour des questions, ouvrez une issue. Les contributions sont bienvenues !
 
 ## Licence
 
 GPLv3 (voir [LICENSE.md](LICENSE.md))
-<<<<<<< HEAD
 
-=======
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 
