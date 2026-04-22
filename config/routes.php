@@ -15,9 +15,6 @@ return [
     ['GET', '/demo/profile/login', [\Koabana\Controller\DemoController::class, 'profileLogin']],
     ['GET', '/demo/profile/logout', [\Koabana\Controller\DemoController::class, 'profileLogout']],
     ['GET', '/demo/flash/add', [\Koabana\Controller\DemoController::class, 'flashAdd']],
-<<<<<<< HEAD
-    ['GET', '/', [\Koabana\Controller\HomeController::class, 'index']],
-=======
 */
 
 
@@ -42,5 +39,4 @@ return [
     ['GET', '/mon-espace', [\Koabana\Controller\DashboardController::class, 'index']],
 
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 ];

@@ -26,11 +26,7 @@ if (!\preg_match('/^[A-Z][a-zA-Z0-9]*Controller$/', $controllerName)) {
 // Chemin racine du projet
 $rootPath = \dirname(__DIR__);
 $controllerPath = $rootPath . '/src/Controller/' . $controllerName . '.php';
-<<<<<<< HEAD
-$templateDir = $rootPath . '/views/' . \lcfirst(\str_replace('Controller', '', $controllerName));
-=======
 $templateDir = $rootPath . '/templates/' . \lcfirst(\str_replace('Controller', '', $controllerName));
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 $templatePath = $templateDir . '/index.php';
 
 // Vérifications

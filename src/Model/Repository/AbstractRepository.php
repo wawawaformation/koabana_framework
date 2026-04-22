@@ -60,12 +60,6 @@ abstract class AbstractRepository
         $data = $this->extractData($entity);
 
         // Exclut l'ID s'il est 0 ou non défini (auto_increment)
-<<<<<<< HEAD
-        if (isset($data['id']) && ($data['id'] === 0 || $data['id'] === '0')) {
-            unset($data['id']);
-        }
-
-=======
         if (isset($data['id']) && (0 === $data['id'] || '0' === $data['id'] || null === $data['id'])) {
             unset($data['id']);
         }
@@ -73,7 +67,6 @@ abstract class AbstractRepository
         // Exclut les colonnes NULL lors de l'insertion (gérées par SQL)
         $data = \array_filter($data, fn ($value) => null !== $value);
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
         $columns = \array_keys($data);
         $placeholders = \array_map(fn ($col) => ':'.$col, $columns);
 
@@ -151,11 +144,7 @@ abstract class AbstractRepository
 
     /**
      * Crée un QueryBuilder pour construire des requêtes complexes
-<<<<<<< HEAD
-     * 
-=======
      *
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * @example
      *   $users = $repo->query()
      *       ->where('age', '>', 18)
@@ -163,11 +152,7 @@ abstract class AbstractRepository
      *       ->orderBy('name')
      *       ->limit(10)
      *       ->get();
-<<<<<<< HEAD
-     * 
-=======
      *
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * @return QueryBuilder
      */
     public function query(): QueryBuilder
@@ -315,10 +300,7 @@ abstract class AbstractRepository
     /**
      * Extrait les propriétés de l'entité via réflexion et les mappe vers des colonnes snake_case.
      * - DateTimeImmutable => string SQL
-<<<<<<< HEAD
-=======
      * - bool => int (0 ou 1)
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * - ignore les propriétés statiques
      *
      * @param object $entity
@@ -344,14 +326,11 @@ abstract class AbstractRepository
                 $column = $this->camelToSnake($name);
                 $value = $prop->getValue($entity);
 
-<<<<<<< HEAD
-=======
                 // Conversion des booléens en entiers pour la base de données
                 if (\is_bool($value)) {
                     $value = $value ? 1 : 0;
                 }
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
                 // DateTimeImmutable -> string SQL
                 if ($value instanceof \DateTimeImmutable) {
                     $value = $value->format('Y-m-d H:i:s');

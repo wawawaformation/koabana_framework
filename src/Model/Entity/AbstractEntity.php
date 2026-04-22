@@ -9,11 +9,7 @@ namespace Koabana\Model\Entity;
  */
 abstract class AbstractEntity
 {
-<<<<<<< HEAD
-    protected int $id;
-=======
     protected ?int $id = null;
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
     protected ?\DateTimeImmutable $createdAt = null;
     protected ?\DateTimeImmutable $updatedAt = null;
 
@@ -23,17 +19,11 @@ abstract class AbstractEntity
     public function __construct() {}
 
     /**
-<<<<<<< HEAD
-     * @return int
-     */
-    public function getId(): int
-=======
      * Retourne l'ID de l'entité
      *
      * @return int|null L'identifiant ou null si non défini (entité non persistée)
      */
     public function getId(): ?int
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
     {
         return $this->id;
     }
@@ -87,15 +77,9 @@ abstract class AbstractEntity
     }
 
     /**
-<<<<<<< HEAD
-     * Met à jour l'identifiant de l'entité
-     *
-     * @param int $id
-=======
      * Définit l'identifiant de l'entité
      *
      * @param int $id L'identifiant
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      *
      * @return $this
      */

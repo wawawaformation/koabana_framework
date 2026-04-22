@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-<?php declare(strict_types=1);
-=======
 <?php
 
 declare(strict_types=1);
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 
 namespace Koabana\Form;
 
@@ -12,12 +8,6 @@ abstract class Field
 {
     protected string $name;
     protected mixed $value = null;
-<<<<<<< HEAD
-    /** @var array<string, mixed> */
-    protected array $attributes = [];
-    /** @var array<string, mixed> */
-    protected array $rules = [];
-=======
 
     /** @var array<string, mixed> */
     protected array $attributes = [];
@@ -25,16 +15,11 @@ abstract class Field
     /** @var array<string, mixed> */
     protected array $rules = [];
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
     /** @var array<string> */
     protected array $errors = [];
 
     /**
-<<<<<<< HEAD
-     * @param string $name
-=======
      * @param string               $name
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * @param array<string, mixed> $attributes
      */
     public function __construct(string $name, array $attributes = [])
@@ -44,24 +29,6 @@ abstract class Field
         $this->extractRules();
     }
 
-<<<<<<< HEAD
-    /**
-     * Extrait les règles de validation des attributs
-     */
-    private function extractRules(): void
-    {
-        /** @var array<string> $validationKeys */
-        $validationKeys = ['required', 'email', 'minLength', 'maxLength', 'regex', 'min', 'max', 'match'];
-        
-        foreach ($validationKeys as $key) {
-            if (isset($this->attributes[$key])) {
-                $this->rules[$key] = $this->attributes[$key];
-            }
-        }
-    }
-
-=======
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
     public function getName(): string
     {
         return $this->name;
@@ -110,14 +77,6 @@ abstract class Field
     }
 
     /**
-<<<<<<< HEAD
-     * Retourne les attributs HTML (exclut les règles de validation)
-     */
-    protected function getHtmlAttributes(): string
-    {
-        /** @var array<string> $validationKeys */
-        $validationKeys = ['required', 'email', 'minLength', 'maxLength', 'regex', 'min', 'max', 'match'];
-=======
      * Méthode abstraite pour le rendu HTML
      */
     abstract public function render(): string;
@@ -151,22 +110,14 @@ abstract class Field
     {
         /** @var array<string> $validationKeys */
         $validationKeys = ['required', 'email', 'minLength', 'maxLength', 'regex', 'min', 'max', 'match', 'label', 'infos'];
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
         $html = '';
 
         foreach ($this->attributes as $key => $value) {
             if (!in_array($key, $validationKeys, true)) {
-<<<<<<< HEAD
-                if ($value === true) {
-                    $html .= " {$key}";
-                } elseif ($value !== false) {
-                    $html .= " {$key}=\"" . htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') . '"';
-=======
                 if (true === $value) {
                     $html .= " {$key}";
                 } elseif (false !== $value) {
                     $html .= " {$key}=\"".htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8').'"';
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
                 }
             }
         }
@@ -175,11 +126,6 @@ abstract class Field
     }
 
     /**
-<<<<<<< HEAD
-     * Méthode abstraite pour le rendu HTML
-     */
-    abstract public function render(): string;
-=======
      * Retourne les attributs HTML de validation
      */
     protected function getValidationAttributes(): string
@@ -235,5 +181,4 @@ abstract class Field
             }
         }
     }
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 }

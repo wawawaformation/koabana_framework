@@ -7,13 +7,8 @@ namespace Koabana\Controller;
 use GuzzleHttp\Psr7\Response;
 use Koabana\Form\EmailInput;
 use Koabana\Form\Form;
-<<<<<<< HEAD
-use Koabana\Form\TextInput;
-use Koabana\Form\Textarea;
-=======
 use Koabana\Form\Textarea;
 use Koabana\Form\TextInput;
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 use Koabana\Http\Session\FlashBag;
 use Koabana\Model\Repository\DemoRepository;
 use Psr\Http\Message\ResponseInterface;
@@ -61,11 +56,7 @@ final class DemoController
         $html .= '<ul>';
         foreach ($users as $user) {
             $name = htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8');
-<<<<<<< HEAD
-            $html .= '<li>' . $name . '</li>';
-=======
             $html .= '<li>'.$name.'</li>';
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
         }
         $html .= '</ul>';
 
@@ -359,11 +350,7 @@ final class DemoController
     public function formDemo(ServerRequestInterface $request): ResponseInterface
     {
         $form = new Form('contact');
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
         $form->add(new TextInput('name', [
             'required' => true,
             'minLength' => 2,
@@ -396,25 +383,12 @@ final class DemoController
         $method = $request->getMethod();
         $errors = [];
 
-<<<<<<< HEAD
-        if ($method === 'POST') {
-            $data = (array)$request->getParsedBody();
-=======
         if ('POST' === $method) {
             $data = (array) $request->getParsedBody();
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             $form->fill($data);
 
             if ($form->validate()) {
                 $this->logger->info('Formulaire valide', $form->getData());
-<<<<<<< HEAD
-                return new Response(200, ['Content-Type' => 'text/html; charset=utf-8'], 
-                    '<h1>✅ Formulaire reçu avec succès !</h1><pre>' . 
-                    htmlspecialchars(json_encode($form->getData(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') .
-                    '</pre><a href="/demo/form-demo">Retour au formulaire</a>');
-            }
-            
-=======
 
                 return new Response(
                     200,
@@ -425,7 +399,6 @@ final class DemoController
                 );
             }
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             $errors = $form->errors();
             $this->logger->warning('Erreurs de validation', $errors);
         }
@@ -436,15 +409,6 @@ final class DemoController
 
         foreach ($form->getFields() as $fieldName => $field) {
             $html .= '<div class="form-group">';
-<<<<<<< HEAD
-            $html .= '<label for="' . $fieldName . '">' . ucfirst($fieldName) . '</label>';
-            $html .= $field->render();
-            
-            if (isset($errors[$fieldName])) {
-                $html .= '<div class="errors">';
-                foreach ($errors[$fieldName] as $error) {
-                    $html .= '<p class="error">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>';
-=======
             $html .= '<label for="'.$fieldName.'">'.ucfirst($fieldName).'</label>';
             $html .= $field->render();
 
@@ -452,7 +416,6 @@ final class DemoController
                 $html .= '<div class="errors">';
                 foreach ($errors[$fieldName] as $error) {
                     $html .= '<p class="error">'.htmlspecialchars($error, ENT_QUOTES, 'UTF-8').'</p>';
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
                 }
                 $html .= '</div>';
             }

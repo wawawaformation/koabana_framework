@@ -46,8 +46,6 @@ final class ProfileBag
         return (string) $this->bag->get('user_firstname', '');
     }
 
-<<<<<<< HEAD
-=======
 
 
     /**
@@ -60,7 +58,6 @@ final class ProfileBag
         return (string) $this->bag->get('user_lastname', '');
     }
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
     /**
      * Récupère l'email de l'utilisateur
      *
@@ -104,10 +101,7 @@ final class ProfileBag
     {
         return [
             'user_id' => $this->getId(),
-<<<<<<< HEAD
-=======
             'user_lastname' => $this->getLastname(),
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             'user_firstname' => $this->getFirstname(),
             'user_email' => $this->getEmail(),
         ];

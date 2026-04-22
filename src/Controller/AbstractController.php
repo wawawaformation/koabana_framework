@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace Koabana\Controller;
 
 use GuzzleHttp\Psr7\Response;
 use Koabana\Http\Session\FlashBag;
@@ -85,10 +85,7 @@ abstract class AbstractController
         }
         $data['profile'] = $this->getUserProfile($request);
         $data['csrf_token'] = (string) $request->getAttribute('csrf_token', '');
-<<<<<<< HEAD
-=======
         $data['csp_nonce'] = (string) $request->getAttribute('csp_nonce', '');
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 
         $html = $this->view->render($template, $data, $layout);
 
@@ -335,8 +332,6 @@ abstract class AbstractController
     }
 
     /**
-<<<<<<< HEAD
-=======
      * Ajoute une erreur à un champ du formulaire et crée un flash message.
      *
      * @param ServerRequestInterface $request   Requête HTTP
@@ -351,7 +346,6 @@ abstract class AbstractController
     }
 
     /**
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * Ajoute un en-tête par défaut s'il n'existe pas déjà (insensible à la casse).
      *
      * @param array<string, string> $headers En-têtes existants
@@ -375,8 +369,6 @@ abstract class AbstractController
 
         return $headers;
     }
-<<<<<<< HEAD
-=======
 
 
 
@@ -399,5 +391,4 @@ abstract class AbstractController
         return $baseUrl;
 
     }
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 }

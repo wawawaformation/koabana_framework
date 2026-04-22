@@ -67,8 +67,6 @@ final class SessionMiddleware implements MiddlewareInterface
             return;
         }
 
-<<<<<<< HEAD
-=======
         // Détection HTTPS et environnement
         $isHttps = !empty($_SERVER['HTTPS']) && 'off' !== strtolower($_SERVER['HTTPS']);
         $appEnv = (string) (getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? 'prod'));
@@ -77,27 +75,18 @@ final class SessionMiddleware implements MiddlewareInterface
         // En production, forcer le flag secure uniquement si HTTPS
         $secureFlag = $isProduction && $isHttps;
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
         ini_set('session.use_strict_mode', '1');
         ini_set('session.cookie_httponly', '1');
         ini_set('session.cookie_samesite', 'Lax');
         ini_set('session.use_only_cookies', '1');
-<<<<<<< HEAD
-        ini_set('session.cookie_secure', '0'); // À mettre à 1 en HTTPS
-=======
         ini_set('session.cookie_secure', $secureFlag ? '1' : '0');
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 
         session_name($this->sessionName);
         session_set_cookie_params([
             'lifetime' => $this->lifetime,
             'path' => '/',
             'domain' => '',
-<<<<<<< HEAD
-            'secure' => false, // true en prod HTTPS
-=======
             'secure' => $secureFlag,
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             'httponly' => true,
             'samesite' => 'Lax',
         ]);

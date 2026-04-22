@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-<?php declare(strict_types=1);
-=======
 <?php
 
 declare(strict_types=1);
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
 
 namespace Koabana\Form;
 
@@ -13,10 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 class Form
 {
     private string $name;
-<<<<<<< HEAD
-=======
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
     /** @var array<string, Field> */
     private array $fields = [];
     private ?object $entity = null;
@@ -47,10 +40,7 @@ class Form
 
     /**
      * Retourne tous les champs
-<<<<<<< HEAD
-=======
      *
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * @return array<string, Field>
      */
     public function getFields(): array
@@ -60,10 +50,7 @@ class Form
 
     /**
      * Hydrate les champs avec des données
-<<<<<<< HEAD
-=======
      *
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * @param array<string, mixed> $data
      */
     public function fill(array $data): void
@@ -83,15 +70,9 @@ class Form
 
         // Récupère les propriétés publiques/getter de l'entity
         foreach ($this->fields as $name => $field) {
-<<<<<<< HEAD
-            $methodName = 'get' . ucfirst($name);
-            if (method_exists($entity, $methodName)) {
-                $field->setValue($entity->$methodName());
-=======
             $methodName = 'get'.ucfirst($name);
             if (method_exists($entity, $methodName)) {
                 $field->setValue($entity->{$methodName}());
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             }
         }
     }
@@ -106,29 +87,19 @@ class Form
 
     /**
      * Retourne les erreurs pour un champ ou tous les champs
-<<<<<<< HEAD
-=======
      *
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * @return array<string, array<string>>|array<string>
      */
     public function errors(?string $fieldName = null): array
     {
-<<<<<<< HEAD
-        if ($fieldName === null) {
-=======
         if (null === $fieldName) {
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             $allErrors = [];
             foreach ($this->fields as $name => $field) {
                 if ($field->hasErrors()) {
                     $allErrors[$name] = $field->getErrors();
                 }
             }
-<<<<<<< HEAD
-=======
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             return $allErrors;
         }
 
@@ -140,9 +111,6 @@ class Form
     }
 
     /**
-<<<<<<< HEAD
-     * Récupère les données du formulaire
-=======
      * Ajoute une erreur à un champ spécifique
      *
      * @param string $fieldName Nom du champ
@@ -158,7 +126,6 @@ class Form
     /**
      * Récupère les données du formulaire
      *
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * @return array<string, mixed>
      */
     public function getData(): array
@@ -177,25 +144,15 @@ class Form
      */
     public function getEntity(): ?object
     {
-<<<<<<< HEAD
-        if ($this->entity === null) {
-=======
         if (null === $this->entity) {
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             return null;
         }
 
         // Hydrate l'entity avec les données du formulaire
         foreach ($this->fields as $name => $field) {
-<<<<<<< HEAD
-            $methodName = 'set' . ucfirst($name);
-            if (method_exists($this->entity, $methodName)) {
-                $this->entity->$methodName($field->getValue());
-=======
             $methodName = 'set'.ucfirst($name);
             if (method_exists($this->entity, $methodName)) {
                 $this->entity->{$methodName}($field->getValue());
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             }
         }
 
@@ -215,28 +172,18 @@ class Form
      */
     public function csrf(): string
     {
-<<<<<<< HEAD
-        if ($this->csrfToken === null) {
-=======
         if (null === $this->csrfToken) {
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             return '';
         }
 
         $token = htmlspecialchars($this->csrfToken, ENT_QUOTES, 'UTF-8');
-<<<<<<< HEAD
-=======
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
         return "<input type=\"hidden\" name=\"_csrf_token\" value=\"{$token}\">";
     }
 
     /**
      * Retourne la balise d'ouverture du formulaire
-<<<<<<< HEAD
-=======
      *
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * @param array<string, mixed> $attributes
      */
     public function open(string $action = '', string $method = 'POST', array $attributes = []): string
@@ -245,25 +192,15 @@ class Form
         $attrs = '';
 
         foreach ($attributes as $key => $value) {
-<<<<<<< HEAD
-            if ($value === true) {
-                $attrs .= " {$key}";
-            } elseif ($value !== false) {
-                $attrs .= " {$key}=\"" . htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8') . '"';
-=======
             if (true === $value) {
                 $attrs .= " {$key}";
             } elseif (false !== $value) {
                 $attrs .= " {$key}=\"".htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8').'"';
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
             }
         }
 
         $actionAttr = $action ? " action=\"{$action}\"" : '';
-<<<<<<< HEAD
-=======
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
         return "<form name=\"{$this->name}\" method=\"{$methodUpper}\"{$actionAttr}{$attrs}>";
     }
 
@@ -281,12 +218,8 @@ class Form
     public static function createFromRequest(string $name, ServerRequestInterface $request): self
     {
         $form = new self($name);
-<<<<<<< HEAD
-        $form->fill((array)$request->getParsedBody());
-=======
         $form->fill((array) $request->getParsedBody());
 
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
         return $form;
     }
 
@@ -294,16 +227,10 @@ class Form
      * Crée un formulaire bindé à une Entity
      * Le callback doit ajouter les champs au formulaire
      *
-<<<<<<< HEAD
-     * @param string $name Nom du formulaire
-     * @param object $entity Entité à binder
-     * @param callable(self): void $fieldBuilder Callback pour ajouter les champs
-=======
      * @param string               $name         Nom du formulaire
      * @param object               $entity       Entité à binder
      * @param callable(self): void $fieldBuilder Callback pour ajouter les champs
      *
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
      * @return self Formulaire configuré et hydraté depuis l'entity
      *
      * @example
@@ -319,23 +246,6 @@ class Form
     ): self {
         $form = new self($name);
         $form->bind($entity);
-<<<<<<< HEAD
-        
-        // Appel le callback pour construire les champs
-        $fieldBuilder($form);
-        
-        // Hydrate depuis l'entity
-        foreach ($form->getFields() as $field) {
-            $methodName = 'get' . ucfirst($field->getName());
-            if (method_exists($entity, $methodName)) {
-                $field->setValue($entity->$methodName());
-            }
-        }
-        
-        return $form;
-    }
-}
-=======
 
         // Appel le callback pour construire les champs
         $fieldBuilder($form);
@@ -351,4 +261,3 @@ class Form
         return $form;
     }
 }
->>>>>>> c69f81c (UPDATE Mise à jour depuis site reeel qui a permis de valider la pratique)
