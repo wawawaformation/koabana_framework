@@ -340,6 +340,20 @@ abstract class AbstractController
     }
 
     /**
+     * Données postées, toujours sous forme de tableau.
+     *
+     * PSR-7 autorise aussi null ou un objet : dans ces cas, on renvoie un tableau vide.
+     *
+     * @return array<string, mixed>
+     */
+    protected function parsedBody(ServerRequestInterface $request): array
+    {
+        $body = $request->getParsedBody();
+
+        return \is_array($body) ? $body : [];
+    }
+
+    /**
      * Récupère l'état de connexion de l'utilisateur
      */
     protected function isLogged(ServerRequestInterface $request): bool

@@ -8,6 +8,8 @@ use Koabana\Model\Entity\TestEntity;
 
 /**
  * Repository pour l'entité TestEntity.
+ *
+ * @extends AbstractRepository<TestEntity>
  */
 class TestRepository extends AbstractRepository
 {

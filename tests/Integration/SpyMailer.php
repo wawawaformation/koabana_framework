@@ -37,6 +37,6 @@ final class SpyMailer extends PHPMailer
      */
     public function recipients(): array
     {
-        return array_map(static fn (array $address): string => $address[0], $this->getToAddresses());
+        return array_values(array_map(static fn (array $address): string => $address[0], $this->getToAddresses()));
     }
 }

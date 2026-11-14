@@ -61,7 +61,7 @@ final class RegisterController extends AbstractController
         $form->setCsrfToken((string) $request->getAttribute('csrf_token', ''));
 
         if ('POST' === $request->getMethod()) {
-            $data = $request->getParsedBody() ?? [];
+            $data = $this->parsedBody($request);
             $form->fill($data);
 
             // on verifie que l'email n'est pas déjà utilisé par un compte actif ;
@@ -185,7 +185,7 @@ final class RegisterController extends AbstractController
         $form->setCsrfToken($csrf);
 
         if ('POST' === $request->getMethod()) {
-            $data = $request->getParsedBody() ?? [];
+            $data = $this->parsedBody($request);
             $form->fill($data);
 
             if ($form->validate()) {

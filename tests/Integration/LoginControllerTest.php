@@ -73,6 +73,19 @@ final class LoginControllerTest extends ControllerTestCase
         self::assertFalse($this->profile($request)->isLogged());
     }
 
+    public function testAccountWithoutPasswordIsRefusedWithTheSameMessage(): void
+    {
+        // Inscrit mais pas encore activé : password_hash vaut NULL en base
+        $this->db->addUser();
+        $request = $this->request('POST', '/connexion', ['email' => 'ada@example.com', 'password' => 'motdepasse1']);
+
+        $response = $this->controller->login($request);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertStringContainsString('Email ou mot de passe incorrect.', (string) $response->getBody());
+        self::assertFalse($this->profile($request)->isLogged());
+    }
+
     public function testUnknownEmailIsRefusedWithTheSameMessage(): void
     {
         $request = $this->request('POST', '/connexion', ['email' => 'inconnu@example.com', 'password' => 'motdepasse1']);

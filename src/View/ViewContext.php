@@ -294,7 +294,7 @@ final class ViewContext
             return false;
         }
 
-        return $this->profile[$attribute] ?? '';
+        return (string) ($this->profile[$attribute] ?? '');
     }
 
     /**

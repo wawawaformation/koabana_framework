@@ -85,6 +85,6 @@ final class UserDatabase
 
     public function countUsers(): int
     {
-        return (int) $this->pdo->query('SELECT COUNT(*) FROM user')->fetchColumn();
+        return (int) $this->repository->statement('SELECT COUNT(*) FROM user')->fetchColumn();
     }
 }

@@ -265,7 +265,7 @@ final class DemoController
             $data = $session->get('user_data', null);
             if ($data) {
                 $html .= '<h2>user_data:</h2>';
-                $html .= '<pre>'.htmlspecialchars(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)).'</pre>';
+                $html .= '<pre>'.htmlspecialchars((string) json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)).'</pre>';
             } else {
                 $html .= '<p><em>Aucune donnée "user_data" en session</em></p>';
             }
@@ -394,7 +394,7 @@ final class DemoController
                     200,
                     ['Content-Type' => 'text/html; charset=utf-8'],
                     '<h1>✅ Formulaire reçu avec succès !</h1><pre>'
-                    .htmlspecialchars(json_encode($form->getData(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8')
+                    .htmlspecialchars((string) json_encode($form->getData(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8')
                     .'</pre><a href="/demo/form-demo">Retour au formulaire</a>',
                 );
             }

@@ -15,6 +15,8 @@ use Koabana\Model\Entity\UserEntity;
  * @author Koabana
  *
  * @version 1.0
+ *
+ * @extends AbstractRepository<UserEntity>
  */
 final class UserRepository extends AbstractRepository
 {
@@ -95,7 +97,9 @@ final class UserRepository extends AbstractRepository
         $pdo = $this->bddFactory->getConnection();
         $sql = 'SELECT password_hash FROM '.$this->table.' WHERE email = :email';
         $stmt = $this->statement($sql, ['email' => $email]);
+        $hash = $stmt->fetchColumn();
 
-        return $stmt->fetchColumn();
+        // Compte pas encore activé : password_hash vaut NULL (return null violerait le type de retour)
+        return \is_string($hash) ? $hash : false;
     }
 }

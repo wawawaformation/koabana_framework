@@ -99,7 +99,7 @@ class Form
     /**
      * Retourne les erreurs pour un champ ou tous les champs
      *
-     * @return array<string, array<string>>|array<string>
+     * @return ($fieldName is null ? array<string, array<string>> : array<string>)
      */
     public function errors(?string $fieldName = null): array
     {

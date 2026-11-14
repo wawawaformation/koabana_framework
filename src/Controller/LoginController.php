@@ -52,7 +52,7 @@ final class LoginController extends AbstractController
         $form->setCsrfToken($csrfToken);
 
         if ('POST' === $request->getMethod()) {
-            $data = $request->getParsedBody() ?? [];
+            $data = $this->parsedBody($request);
             $form->fill($data);
 
             if ($form->Validate()) {
@@ -118,7 +118,7 @@ final class LoginController extends AbstractController
         $form->setCsrfToken($request->getAttribute('csrf_token', ''));
 
         if ('POST' === $request->getMethod()) {
-            $data = $request->getParsedBody() ?? [];
+            $data = $this->parsedBody($request);
             $form->fill($data);
 
             if ($form->Validate()) {
@@ -214,7 +214,7 @@ final class LoginController extends AbstractController
         $form->setCsrfToken($request->getAttribute('csrf_token', ''));
 
         if ('POST' === $request->getMethod()) {
-            $data = $request->getParsedBody() ?? [];
+            $data = $this->parsedBody($request);
             $form->fill($data);
 
             if ($form->Validate()) {

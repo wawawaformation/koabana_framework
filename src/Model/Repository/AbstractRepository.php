@@ -10,10 +10,18 @@ use Koabana\Model\Entity\AbstractEntity;
 
 /**
  * Repository de base : accès BDD et hydratation d'entités.
+ *
+ * Générique (annotation lue par PHPStan, sans effet à l'exécution) : T est la classe d'entité gérée.
+ * Une sous-classe la précise avec « @extends AbstractRepository<UserEntity> » ;
+ * findById() est alors connu pour renvoyer un UserEntity, sans vérification dans les contrôleurs.
+ *
+ * @template T of AbstractEntity
  */
 abstract class AbstractRepository
 {
     protected string $table;
+
+    /** @var class-string<T> */
     protected string $entityClass;
 
     public function __construct(protected BDDFactory $bddFactory) {}
@@ -21,7 +29,7 @@ abstract class AbstractRepository
     /**
      * Retourne toutes les entités de la table
      *
-     * @return array<int, AbstractEntity>
+     * @return list<T>
      */
     public function findAll(): array
     {
@@ -37,7 +45,7 @@ abstract class AbstractRepository
      *
      * @param int $id
      *
-     * @return null|AbstractEntity
+     * @return null|T
      */
     public function findById(int $id): ?object
     {
@@ -51,7 +59,7 @@ abstract class AbstractRepository
     /**
      * Crée une nouvelle entité en base de données
      *
-     * @param AbstractEntity $entity
+     * @param T $entity
      *
      * @return int L'ID de l'entité créée
      */
@@ -85,7 +93,7 @@ abstract class AbstractRepository
     /**
      * Met à jour une entité en base de données
      *
-     * @param AbstractEntity $entity
+     * @param T $entity
      *
      * @return bool True si au moins une ligne a été affectée
      */
@@ -139,7 +147,7 @@ abstract class AbstractRepository
     /**
      * Supprime une entité par son objet
      *
-     * @param AbstractEntity $entity
+     * @param T $entity
      *
      * @return bool True si au moins une ligne a été supprimée
      */
@@ -194,7 +202,7 @@ abstract class AbstractRepository
      *
      * @param array<string, mixed> $row
      *
-     * @return object
+     * @return T
      */
     protected function hydrate(array $row): object
     {
@@ -225,7 +233,7 @@ abstract class AbstractRepository
      *
      * @param array<int, array<string, mixed>> $rows
      *
-     * @return array<int, object>
+     * @return list<T>
      */
     protected function hydrateAll(array $rows): array
     {

@@ -8,6 +8,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Koabana\Form\Form;
 use Koabana\Form\TextInput;
 use PHPUnit\Framework\TestCase;
+use Tests\Support\ContactEntity;
 
 /**
  * Orchestration du formulaire : champs, données, validation, entité et rendu.
@@ -173,30 +174,8 @@ final class FormTest extends TestCase
     /**
      * Petite entité de test avec getters et setters.
      */
-    private function entity(string $nom, string $email): object
+    private function entity(string $nom, string $email): ContactEntity
     {
-        return new class($nom, $email) {
-            public function __construct(private string $nom, private string $email) {}
-
-            public function getNom(): string
-            {
-                return $this->nom;
-            }
-
-            public function setNom(string $nom): void
-            {
-                $this->nom = $nom;
-            }
-
-            public function getEmail(): string
-            {
-                return $this->email;
-            }
-
-            public function setEmail(string $email): void
-            {
-                $this->email = $email;
-            }
-        };
+        return new ContactEntity($nom, $email);
     }
 }

@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use GuzzleHttp\Psr7\ServerRequest;
-use Koabana\Controller\AbstractController;
 use Koabana\Http\Session\FlashBag;
 use Koabana\Http\Session\ProfileBag;
 use Koabana\Http\Session\SessionBag;
 use Koabana\View\PhpTemplateRenderer;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Tests\Support\ExposedController;
 
 /**
  * Méthodes utilitaires communes aux contrôleurs.
@@ -24,54 +22,11 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 final class AbstractControllerTest extends TestCase
 {
-    private object $controller;
+    private ExposedController $controller;
 
     protected function setUp(): void
     {
-        // Sous-classe de test qui rend publiques les méthodes protégées
-        $this->controller = new class(new PhpTemplateRenderer(\dirname(__DIR__, 2).'/templates')) extends AbstractController {
-            /** @param array<string, string> $headers */
-            public function callHtml(string $html, int $status = 200, array $headers = []): ResponseInterface
-            {
-                return $this->html($html, $status, $headers);
-            }
-
-            public function callText(string $text): ResponseInterface
-            {
-                return $this->text($text);
-            }
-
-            /** @param array<string, mixed> $data */
-            public function callJson(array $data): ResponseInterface
-            {
-                return $this->json($data);
-            }
-
-            public function callNotFound(): ResponseInterface
-            {
-                return $this->notFound();
-            }
-
-            public function callRedirect(string $location, int $status): ResponseInterface
-            {
-                return $this->redirect($location, $status);
-            }
-
-            public function callIsLogged(ServerRequestInterface $request): bool
-            {
-                return $this->isLogged($request);
-            }
-
-            public function callSession(ServerRequestInterface $request): SessionBag
-            {
-                return $this->session($request);
-            }
-
-            public function callAddFlash(ServerRequestInterface $request): void
-            {
-                $this->addFlash($request, 'info', 'Message');
-            }
-        };
+        $this->controller = new ExposedController(new PhpTemplateRenderer(\dirname(__DIR__, 2).'/templates'));
     }
 
     // --- URL de base ---
@@ -195,5 +150,32 @@ final class AbstractControllerTest extends TestCase
         $this->controller->callAddFlash(new ServerRequest('GET', '/')->withAttribute('flash', $flash));
 
         self::assertSame(['info' => ['Message']], $flash->all());
+    }
+
+    // --- Corps de la requête ---
+
+    /**
+     * @param null|array<string, mixed>|object $body
+     * @param array<string, mixed>             $expected
+     */
+    #[DataProvider('parsedBodies')]
+    public function testParsedBodyIsAlwaysAnArray(array|object|null $body, array $expected): void
+    {
+        $request = new ServerRequest('POST', '/')->withParsedBody($body);
+
+        self::assertSame($expected, $this->controller->callParsedBody($request));
+    }
+
+    /**
+     * @return iterable<string, array{null|array<string, mixed>|object, array<string, mixed>}>
+     */
+    public static function parsedBodies(): iterable
+    {
+        yield 'formulaire' => [['email' => 'ada@example.com'], ['email' => 'ada@example.com']];
+
+        yield 'corps absent' => [null, []];
+
+        // PSR-7 autorise un objet : on ne s'en sert pas, plutôt qu'une erreur fatale sur $data['email']
+        yield 'objet' => [(object) ['email' => 'ada@example.com'], []];
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration;
 
 use Koabana\Database\BDDFactory;
+use Koabana\Model\Entity\AbstractEntity;
 use Koabana\Model\Entity\UserEntity;
 use Koabana\Model\Repository\AbstractRepository;
 use PHPUnit\Framework\TestCase;
@@ -34,7 +35,6 @@ final class AbstractRepositoryTest extends TestCase
         $users = $this->db->repository->findAll();
 
         self::assertCount(2, $users);
-        self::assertContainsOnlyInstancesOf(UserEntity::class, $users);
         self::assertSame(['ada@example.com', 'bob@example.com'], array_map(static fn (UserEntity $u) => $u->getEmail(), $users));
     }
 
@@ -168,15 +168,21 @@ final class AbstractRepositoryTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Entity class not found: Koabana\Model\Entity\Inexistante');
 
+        // @phpstan-ignore argument.type (classe volontairement inexistante)
         $this->repositoryFor('user', 'Koabana\Model\Entity\Inexistante')->findAll();
     }
 
     /**
      * Repository sur une table et une classe d'entité quelconques.
+     *
+     * @param class-string<AbstractEntity> $entityClass
+     *
+     * @return AbstractRepository<AbstractEntity>
      */
     private function repositoryFor(string $table, string $entityClass): AbstractRepository
     {
         return new class($this->db->factory, $table, $entityClass) extends AbstractRepository {
+            /** @param class-string<AbstractEntity> $entityClass */
             public function __construct(BDDFactory $factory, string $table, string $entityClass)
             {
                 parent::__construct($factory);

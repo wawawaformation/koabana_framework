@@ -199,7 +199,7 @@ final class PostController extends AbstractController
 
     public function store(ServerRequestInterface $request): ResponseInterface
     {
-        $data = (array) $request->getParsedBody();
+        $data = $this->parsedBody($request);
         
         // Traiter les données
         
@@ -241,6 +241,13 @@ $this->notFound($request);           // 404
 $this->forbidden($request);           // 403
 $this->badRequest($request);          // 400
 $this->serverError($request);         // 500
+```
+
+#### Données postées
+```php
+// Toujours un tableau : [] si le corps est absent ou n'est pas un tableau
+// (PSR-7 autorise aussi null ou un objet pour getParsedBody())
+$data = $this->parsedBody($request);
 ```
 
 #### Sessions
@@ -295,6 +302,9 @@ namespace Koabana\Model\Repository;
 use Koabana\Database\BDDFactory;
 use Koabana\Model\Entity\Post;
 
+/**
+ * @extends AbstractRepository<Post>
+ */
 final class PostRepository extends AbstractRepository
 {
     protected string $table = 'posts';
@@ -321,6 +331,21 @@ final class PostRepository extends AbstractRepository
     }
 }
 ```
+
+#### Génériques (`@extends AbstractRepository<Post>`)
+
+`AbstractRepository` est **générique** au sens de PHPStan : l'annotation `@extends AbstractRepository<Post>` indique la classe d'entité gérée. C'est de la documentation lue par l'analyse statique, **sans effet à l'exécution**. PHPStan sait alors que :
+
+- `findById()` renvoie `?Post` et `findAll()` une liste de `Post` ;
+- `create()`, `update()` et `deleteEntity()` attendent un `Post` ;
+- `$entityClass` doit être une classe dérivée d'`AbstractEntity`.
+
+```php
+$post = $postRepository->findById(1);
+$post?->getTitle(); // PHPStan connaît le type : pas besoin de « instanceof Post »
+```
+
+Sans l'annotation, PHPStan signale une erreur (« does not specify its types: T »).
 
 ### CRUD complet
 
@@ -488,7 +513,7 @@ $form->add(new Textarea('message', [
 
 ```php
 if ($method === 'POST') {
-    $form->fill((array) $request->getParsedBody());
+    $form->fill($this->parsedBody($request));
     
     if ($form->validate()) {
         $data = $form->getData();
@@ -881,7 +906,7 @@ final class PostController extends AbstractController
             $form->add(new Textarea('content', ['required' => true]));
         });
         
-        $form->fill((array) $request->getParsedBody());
+        $form->fill($this->parsedBody($request));
         
         if ($form->validate()) {
             $post->setPublished(false);
@@ -924,7 +949,7 @@ final class PostController extends AbstractController
             $form->add(new Textarea('content', ['required' => true]));
         });
         
-        $form->fill((array) $request->getParsedBody());
+        $form->fill($this->parsedBody($request));
         
         if ($form->validate()) {
             $this->repo->update($post);

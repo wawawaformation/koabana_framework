@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Koabana\Model\Repository;
 
 /**
- * Repository de démonstration (données en mémoire).
+ * Repository de démonstration (données en mémoire, sans entité).
+ *
+ * @extends AbstractRepository<\Koabana\Model\Entity\AbstractEntity>
  */
 final class DemoRepository extends AbstractRepository
 {
