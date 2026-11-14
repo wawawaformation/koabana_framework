@@ -67,13 +67,8 @@ final class TrailingSlashMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        // Supprime uniquement 1 slash final
+        // Supprime uniquement 1 slash final (le chemin fait au moins 2 caractères : jamais vide)
         $newPath = \substr($path, 0, -1);
-
-        // Sécurité : si ça devient vide, on retombe sur "/"
-        if ('' === $newPath) {
-            $newPath = '/';
-        }
 
         $newUri = $uri->withPath($newPath);
 

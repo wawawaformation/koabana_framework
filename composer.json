@@ -47,8 +47,8 @@
     "stan": "phpstan analyse --memory-limit=1G",
     "test": "phpunit -c phpunit.xml",
     "test:coverage": [
-      "phpunit -c phpunit.xml --coverage-filter src --coverage-clover var/clover.xml",
-      "php bin/coverage-check.php var/clover.xml 89"
+      "phpunit -c phpunit.xml --coverage-clover var/clover.xml",
+      "php bin/coverage-check.php var/clover.xml 96"
     ],
     "qa": [
       "@cs:check",

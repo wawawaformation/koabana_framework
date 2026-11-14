@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Koabana\View\ViewContext;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,10 +16,12 @@ use PHPUnit\Framework\TestCase;
 final class ViewContextTest extends TestCase
 {
     private ViewContext $viewContext;
+    private int $obLevel;
 
     protected function setUp(): void
     {
         $this->viewContext = new ViewContext();
+        $this->obLevel = ob_get_level();
     }
 
     public function testStartSection(): void
@@ -168,5 +171,53 @@ final class ViewContextTest extends TestCase
         $this->viewContext->addFooterJs('/c.js', ['defer' => true, 'async' => false, 'nonce' => null]);
 
         self::assertSame('<script src="/c.js" defer></script>', $this->viewContext->footerJs());
+    }
+
+    public function testEmptyAssetsAndAttributeNamesAreIgnored(): void
+    {
+        $this->viewContext->addStyleSheet('  ');
+        $this->viewContext->addHeaderJs('');
+        $this->viewContext->addFooterJs(' ');
+        $this->viewContext->addFooterJs('/c.js', [' ' => 'sans nom']);
+
+        self::assertSame('', $this->viewContext->styleSheets());
+        self::assertSame('', $this->viewContext->headerJs());
+        self::assertSame('<script src="/c.js"></script>', $this->viewContext->footerJs());
+    }
+
+    /**
+     * @param callable(ViewContext): void $misuse
+     */
+    #[DataProvider('sectionMisuses')]
+    public function testSectionMisuseIsReported(callable $misuse, string $message): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage($message);
+
+        try {
+            $misuse($this->viewContext);
+        } finally {
+            // Referme le tampon ouvert par un start() réussi
+            while (ob_get_level() > $this->obLevel) {
+                ob_end_clean();
+            }
+        }
+    }
+
+    /**
+     * @return iterable<string, array{callable(ViewContext): void, string}>
+     */
+    public static function sectionMisuses(): iterable
+    {
+        yield 'start sans nom' => [static fn (ViewContext $v) => $v->start(' '), 'cannot be empty'];
+
+        yield 'end sans nom' => [static fn (ViewContext $v) => $v->end(''), 'cannot be empty'];
+
+        yield 'section ouverte deux fois' => [static function (ViewContext $v): void {
+            $v->start('content');
+            $v->start('content');
+        }, 'already started'];
+
+        yield 'end sans start' => [static fn (ViewContext $v) => $v->end('content'), 'not started'];
     }
 }

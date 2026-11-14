@@ -163,33 +163,15 @@ class Svg
      */
     public function render(): string
     {
-        if ('' === trim($this->svgContent)) {
-            return '';
-        }
-
-        $previous = libxml_use_internal_errors(true);
-        libxml_clear_errors();
-
         $doc = new \DOMDocument();
         $doc->preserveWhiteSpace = false;
         $doc->formatOutput = false;
 
-        $ok = $doc->loadXML($this->svgContent, LIBXML_NONET);
-        if (!$ok) {
-            libxml_clear_errors();
-            libxml_use_internal_errors($previous);
+        // Contenu déjà validé par le constructeur : XML correct, balise <svg> à la racine
+        $doc->loadXML($this->svgContent, LIBXML_NONET);
 
-            // Fallback : on renvoie le contenu brut si jamais ça casse
-            return $this->svgContent;
-        }
-
-        libxml_use_internal_errors($previous);
-
-        /** @var null|\DOMElement $svgNode */
-        $svgNode = $doc->getElementsByTagName('svg')->item(0);
-        if (!$svgNode) {
-            return $this->svgContent;
-        }
+        /** @var \DOMElement $svgNode */
+        $svgNode = $doc->documentElement;
 
         // 1) Nettoyage total des attributs gérés (pas de fusion)
         $this->setAttribute($svgNode, 'class', null);

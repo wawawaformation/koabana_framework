@@ -110,10 +110,6 @@ abstract class AbstractRepository
             $data['updated_at'] = $now->format('Y-m-d H:i:s');
         }
 
-        if (empty($data)) {
-            return false;
-        }
-
         $sets = \array_map(fn ($col) => $col.' = :'.$col, \array_keys($data));
         $sql = 'UPDATE '.$this->table
             .' SET '.implode(', ', $sets)
@@ -284,9 +280,6 @@ abstract class AbstractRepository
         }
 
         if (\str_ends_with($property, 'At')) {
-            if ($value instanceof \DateTimeImmutable) {
-                return $value;
-            }
             if (\is_int($value)) {
                 return new \DateTimeImmutable()->setTimestamp($value);
             }

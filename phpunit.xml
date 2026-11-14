@@ -18,4 +18,16 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+
+    <!-- Code mesuré par la couverture -->
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+        <!-- Code de démonstration, volontairement non testé -->
+        <exclude>
+            <file>src/Controller/DemoController.php</file>
+            <file>src/Model/Entity/TestEntity.php</file>
+        </exclude>
+    </source>
 </phpunit>
