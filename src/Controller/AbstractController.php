@@ -65,10 +65,9 @@ abstract class AbstractController
     {
         $uri = $request->getUri();
         $baseUrl = $uri->getScheme().'://'.$uri->getHost();
-        if (
-            ('https' === $uri->getScheme() && 443 !== $uri->getPort())
-            || ('http' === $uri->getScheme() && 80 !== $uri->getPort())
-        ) {
+
+        // PSR-7 : getPort() renvoie null pour le port standard du schéma (80 en http, 443 en https)
+        if (null !== $uri->getPort()) {
             $baseUrl .= ':'.$uri->getPort();
         }
 

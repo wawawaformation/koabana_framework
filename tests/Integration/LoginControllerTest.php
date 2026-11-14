@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration;
 
 use Koabana\Controller\LoginController;
+use Koabana\Http\Session\SessionBag;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 
 /**
@@ -112,6 +113,20 @@ final class LoginControllerTest extends ControllerTestCase
 
         self::assertSame('/connexion', $response->getHeaderLine('Location'));
         self::assertFalse($this->profile($request)->isLogged());
+    }
+
+    public function testLogoutKeepsTheRestOfTheSession(): void
+    {
+        $request = $this->request('GET', '/deconnexion');
+        $session = $request->getAttribute('session');
+        self::assertInstanceOf(SessionBag::class, $session);
+        $session->set('panier', 3);
+        $this->profile($request)->set(['user_id' => 1]);
+
+        $this->controller->logout($request);
+
+        self::assertSame(3, $session->get('panier'));
+        self::assertSame(['success' => ['Déconnexion réussie !']], $this->flashes($request));
     }
 
     // --- Mot de passe oublié ---

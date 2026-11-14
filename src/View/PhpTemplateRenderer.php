@@ -98,26 +98,43 @@ final class PhpTemplateRenderer
      *
      * @return string Contenu rendu
      *
-     * @throws \RuntimeException Si le template est introuvable
+     * @throws \InvalidArgumentException Si le nom remonte hors du dossier des templates (« .. »)
+     * @throws \RuntimeException         Si le template est introuvable
      */
     private function renderFile(string $template, array $data): string
     {
         $template = \ltrim($template, '/\\');
+
+        // Aucun segment « .. » : un nom de template ne doit jamais sortir du dossier des templates
+        if (1 === \preg_match('#(^|[/\\\])\.\.([/\\\]|$)#', $template)) {
+            throw new \InvalidArgumentException('Invalid template name: '.$template);
+        }
+
         $file = $this->templatesPath.DIRECTORY_SEPARATOR.$template.'.php';
 
         if (!\is_file($file)) {
             throw new \RuntimeException('Template not found: '.$file);
         }
 
-        // Variable disponible dans tous les templates : $view
-        $view = $this->view;
-
-        // Variables métier passées par le contrôleur
-        \extract($data, EXTR_SKIP);
-
+        $level = \ob_get_level();
         \ob_start();
 
-        require $file;
+        try {
+            // Portée isolée : le template ne voit que $view et les données du contrôleur
+            // (une clé « data », « template » ou « file » n'est plus masquée par une variable interne)
+            (static function (string $__file, array $__data, ViewContext $view): void {
+                \extract($__data, EXTR_SKIP);
+
+                require $__file;
+            })($file, $data, $this->view);
+        } catch (\Throwable $e) {
+            // Referme les tampons ouverts (y compris une section inachevée) : pas de HTML partiel qui fuit
+            while (\ob_get_level() > $level) {
+                \ob_end_clean();
+            }
+
+            throw $e;
+        }
 
         return (string) \ob_get_clean();
     }

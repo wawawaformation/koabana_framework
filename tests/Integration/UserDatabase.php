@@ -17,6 +17,7 @@ use Koabana\Model\Repository\UserRepository;
 final class UserDatabase
 {
     public readonly MyPDO $pdo;
+    public readonly BDDFactory $factory;
     public readonly UserRepository $repository;
 
     public function __construct()
@@ -38,7 +39,7 @@ final class UserDatabase
         );
 
         // Fabrique qui renvoie toujours la connexion SQLite, sans lire DB_DSN
-        $factory = new class($this->pdo) extends BDDFactory {
+        $this->factory = new class($this->pdo) extends BDDFactory {
             public function __construct(MyPDO $pdo)
             {
                 $this->connection = $pdo;
@@ -50,7 +51,7 @@ final class UserDatabase
             }
         };
 
-        $this->repository = new UserRepository($factory);
+        $this->repository = new UserRepository($this->factory);
     }
 
     /**

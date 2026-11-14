@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Koabana\Http;
 
 use Koabana\Http\Middleware\ErrorHandlerMiddleware;
+use Koabana\Http\Middleware\SecurityHeadersMiddleware;
 use League\Route\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -32,7 +33,13 @@ final class Kernel implements RequestHandlerInterface
         $appEnv = (string) (getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? 'prod'));
         $displayErrors = 'prod' !== $appEnv;
 
-        array_unshift($queue, new ErrorHandlerMiddleware($this->logger, $displayErrors));
+        // SecurityHeaders à l'extérieur de tout, puis ErrorHandler : toutes les réponses
+        // (erreurs 404/500, refus CSRF, redirections) reçoivent les en-têtes de sécurité
+        array_unshift(
+            $queue,
+            new SecurityHeadersMiddleware(),
+            new ErrorHandlerMiddleware($this->logger, $displayErrors),
+        );
 
         $queue[] = new class($this->router) implements MiddlewareInterface {
             public function __construct(private readonly Router $router) {}

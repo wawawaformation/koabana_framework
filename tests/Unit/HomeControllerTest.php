@@ -70,7 +70,7 @@ final class HomeControllerTest extends TestCase
 
         return new ServerRequest('GET', 'http://localhost/')
             ->withAttribute('flash', new FlashBag($session))
-            ->withAttribute('profile', new ProfileBag($session))
+            ->withAttribute('profile', new ProfileBag($session->bag('profile')))
         ;
     }
 }

@@ -109,10 +109,9 @@ final class CsrfMiddleware implements MiddlewareInterface
         // 2. Vérifier dans le body (form-data ou JSON)
         $parsedBody = $request->getParsedBody();
 
-        if (is_array($parsedBody) && isset($parsedBody[self::FORM_FIELD])) {
-            $formToken = (string) $parsedBody[self::FORM_FIELD];
-
-            return hash_equals($expectedToken, $formToken);
+        // Un jeton qui n'est pas une chaîne (ex. _csrf_token[]=x) est simplement invalide
+        if (is_array($parsedBody) && is_string($parsedBody[self::FORM_FIELD] ?? null)) {
+            return hash_equals($expectedToken, $parsedBody[self::FORM_FIELD]);
         }
 
         return false;

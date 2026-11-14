@@ -152,4 +152,21 @@ final class ViewContextTest extends TestCase
 
         self::assertFalse($this->viewContext->getProfileAttribute('invalid_attr'));
     }
+
+    public function testAttributeValuesAreEscaped(): void
+    {
+        $this->viewContext->addStyleSheet('/a.css" onload="alert(1)');
+        $this->viewContext->addHeaderJs('/b.js', ['data-x' => '<"&>']);
+
+        self::assertSame('<link rel="stylesheet" href="/a.css&quot; onload=&quot;alert(1)">', $this->viewContext->styleSheets());
+        self::assertSame('<script src="/b.js" data-x="&lt;&quot;&amp;&gt;"></script>', $this->viewContext->headerJs());
+    }
+
+    public function testBooleanAttributes(): void
+    {
+        // true : attribut seul ; false : omis (defer="" activerait l'attribut)
+        $this->viewContext->addFooterJs('/c.js', ['defer' => true, 'async' => false, 'nonce' => null]);
+
+        self::assertSame('<script src="/c.js" defer></script>', $this->viewContext->footerJs());
+    }
 }

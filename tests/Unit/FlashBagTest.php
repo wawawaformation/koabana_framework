@@ -104,4 +104,27 @@ final class FlashBagTest extends TestCase
         $messages = $this->flashBag->get('non_existent');
         self::assertEquals([], $messages);
     }
+
+    public function testCorruptedFlashDataIsReset(): void
+    {
+        $data = ['_flash' => 'pas un tableau'];
+        $flash = new FlashBag(new SessionBag($data));
+
+        self::assertSame([], $flash->all());
+    }
+
+    public function testEmptyTypeMeansInfo(): void
+    {
+        $this->flashBag->add('  ', 'Message');
+
+        self::assertTrue($this->flashBag->has(''));
+        self::assertSame(['Message'], $this->flashBag->get(' '));
+    }
+
+    public function testEmptyMessageIsIgnored(): void
+    {
+        $this->flashBag->add('error', '');
+
+        self::assertFalse($this->flashBag->has());
+    }
 }

@@ -363,12 +363,12 @@ $posts = $repo->query()->get();
 
 // WHERE simple
 $published = $repo->query()
-    ->where('published', true)
+    ->where('published', '=', true)
     ->get();
 
 // Plusieurs WHERE (AND)
 $recent = $repo->query()
-    ->where('published', true)
+    ->where('published', '=', true)
     ->where('created_at', '>', '2026-01-01')
     ->get();
 
@@ -380,6 +380,11 @@ $featured = $repo->query()
 // WHERE BETWEEN
 $thisMonth = $repo->query()
     ->whereBetween('created_at', '2026-02-01', '2026-02-28')
+    ->get();
+
+// WHERE IS NULL / IS NOT NULL (where() refuse une valeur NULL)
+$drafts = $repo->query()
+    ->whereNull('published_at')
     ->get();
 
 // ORDER BY
@@ -396,12 +401,12 @@ $page = $repo->query()
 
 // COUNT
 $count = $repo->query()
-    ->where('published', true)
+    ->where('published', '=', true)
     ->count();
 
 // FIRST (premier résultat ou null)
 $post = $repo->query()
-    ->where('slug', 'hello-world')
+    ->where('slug', '=', 'hello-world')
     ->first();
 
 // Colonnes spécifiques
@@ -411,20 +416,28 @@ $titles = $repo->query()
 
 // Debug: voir le SQL généré
 echo $repo->query()
-    ->where('published', true)
+    ->where('published', '=', true)
     ->toRawSql();
 ```
 
 ### Opérateurs supportés
+
+`where()` exige toujours trois arguments : colonne, opérateur, valeur.
+
 - `=` — égal
-- `!=` — pas égal
+- `!=` ou `<>` — pas égal
 - `<` — inférieur
 - `>` — supérieur
 - `<=` — inférieur ou égal
 - `>=` — supérieur ou égal
-- `LIKE` — recherche textuelle
+- `LIKE` / `NOT LIKE` — recherche textuelle (insensible à la casse de l'opérateur)
 - `IN` — dans une liste (via `whereIn()`)
 - `BETWEEN` — entre deux valeurs (via `whereBetween()`)
+- `IS NULL` / `IS NOT NULL` — via `whereNull()` / `whereNotNull()`
+
+### Sécurité
+
+Les valeurs sont toujours liées par requête préparée. Les noms de colonnes (`select`, `where*`, `orderBy`) doivent être des identifiants simples (`email`, `user.email`, ou `*` pour `select`) et l'opérateur doit faire partie de la liste ci-dessus : sinon, une `InvalidArgumentException` est levée. Les expressions (`COUNT(*)`, alias `AS`) ne sont pas acceptées dans `select()`.
 
 ---
 
@@ -828,7 +841,7 @@ final class PostController extends AbstractController
         $offset = ($page - 1) * 10;
         
         $posts = $this->repo->query()
-            ->where('published', true)
+            ->where('published', '=', true)
             ->orderBy('created_at', 'DESC')
             ->limit(10)
             ->offset($offset)

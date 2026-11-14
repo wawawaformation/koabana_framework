@@ -424,6 +424,37 @@ final class SvgTest extends TestCase
     }
 
     /* -------------------------------------------------
+     * Titre et rôle
+     * ------------------------------------------------- */
+
+    public function testTitleWithoutIdGetsAStableGeneratedId(): void
+    {
+        $svg = new Svg($this->writeFile('t.svg', $this->svgWithViewBox()));
+
+        $root = $this->loadRenderedRoot($svg->setTitle('Accueil')->render());
+
+        $expectedId = 'svg-title-'.substr(sha1('Accueil'), 0, 10);
+        self::assertSame($expectedId, $root->getAttribute('aria-labelledby'));
+        self::assertSame($expectedId, $root->getElementsByTagName('title')->item(0)?->getAttribute('id'));
+    }
+
+    public function testTitleIsAddedToAnEmptySvg(): void
+    {
+        $svg = new Svg($this->writeFile('vide.svg', $this->svgWithViewBox('', '')));
+
+        $root = $this->loadRenderedRoot($svg->setTitle('Vide', 'titre-vide')->render());
+
+        self::assertSame('Vide', $root->firstChild?->textContent);
+    }
+
+    public function testRemoveRole(): void
+    {
+        $svg = new Svg($this->writeFile('r.svg', $this->svgWithViewBox('role="img"')));
+
+        self::assertFalse($this->loadRenderedRoot($svg->removeRole()->render())->hasAttribute('role'));
+    }
+
+    /* -------------------------------------------------
      * Helpers
      * ------------------------------------------------- */
 

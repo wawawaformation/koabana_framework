@@ -350,7 +350,8 @@ final class ViewContext
         $parts = [];
 
         foreach ($attributes as $name => $value) {
-            if (null === $value) {
+            // null ou false : attribut omis (defer="" activerait l'attribut)
+            if (null === $value || false === $value) {
                 continue;
             }
 
@@ -359,13 +360,15 @@ final class ViewContext
                 continue;
             }
 
-            /**
-             * Important (pédagogique) :
-             * Aucun échappement XSS automatique n'est appliqué ici.
-             * La gestion de l'échappement est volontairement laissée
-             * à la charge des templates / stagiaires.
-             */
-            $parts[] = \sprintf(' %s="%s"', $name, (string) $value);
+            // true : attribut booléen HTML, sans valeur (ex. defer)
+            if (true === $value) {
+                $parts[] = ' '.$name;
+
+                continue;
+            }
+
+            // Valeur échappée : un guillemet ne doit pas permettre d'injecter du HTML (XSS)
+            $parts[] = \sprintf(' %s="%s"', $name, $this->e((string) $value));
         }
 
         return \implode('', $parts);

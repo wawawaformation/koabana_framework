@@ -98,7 +98,17 @@ abstract class AbstractRepository
         }
 
         $id = $data['id'];
-        unset($data['id']); // on exclut l'ID de la clause SET
+        unset($data['id'], $data['created_at']); // on exclut l'ID de la clause SET
+
+        // La date de création ne change jamais après l'insertion (et peut être absente
+        // de l'objet en mémoire juste après create())
+
+        // Date de modification tenue à jour automatiquement, dans l'objet comme en base
+        if (\array_key_exists('updated_at', $data)) {
+            $now = new \DateTimeImmutable();
+            $entity->setUpdatedAt($now);
+            $data['updated_at'] = $now->format('Y-m-d H:i:s');
+        }
 
         if (empty($data)) {
             return false;

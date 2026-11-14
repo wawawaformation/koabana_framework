@@ -42,7 +42,9 @@ final class SessionMiddleware implements MiddlewareInterface
         // Création des bags disponibles dans la requête
         $sessionBag = new SessionBag($_SESSION);
         $flashBag = new FlashBag($sessionBag);
-        $profileBag = new ProfileBag($sessionBag);
+        // Profil isolé dans son propre sous-sac : le vider (déconnexion) ne touche
+        // ni au jeton CSRF, ni aux messages flash, ni aux autres données de session
+        $profileBag = new ProfileBag($sessionBag->bag('profile'));
 
         // Ajout en tant qu'attributs de requête pour y accéder dans les contrôleurs
         $request = $request

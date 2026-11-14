@@ -9,16 +9,26 @@ namespace Koabana\Database;
  *
  * Permet construire des requêtes SELECT de façon fluide sans ORM.
  * Reste compatible avec les prepared statements PDO.
+ *
+ * Sécurité : les valeurs sont toujours liées (« ? »). Les noms de colonnes et les
+ * opérateurs, eux, sont écrits dans le SQL : ils sont donc validés (format d'identifiant,
+ * liste blanche d'opérateurs) et une valeur invalide lève une InvalidArgumentException.
  */
 final class QueryBuilder
 {
+    /** Opérateurs autorisés dans where() */
+    private const array OPERATORS = ['=', '!=', '<>', '<', '<=', '>', '>=', 'LIKE', 'NOT LIKE'];
+
+    /** Nom de colonne, éventuellement préfixé par la table (ex. user.email) */
+    private const string IDENTIFIER = '/^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?$/';
+
     private string $table;
     private BDDFactory $bddFactory;
 
     /** @var array<string> */
     private array $columns = [];
 
-    /** @var array<array{column: string, operator: string, value: mixed}> */
+    /** @var array<string> fragments SQL des conditions, combinés par AND */
     private array $wheres = [];
 
     /** @var array<array{column: string, direction: string}> */
@@ -26,7 +36,7 @@ final class QueryBuilder
     private ?int $limitValue = null;
     private ?int $offsetValue = null;
 
-    /** @var array<mixed> */
+    /** @var array<mixed> valeurs liées, dans l'ordre exact des « ? » des conditions */
     private array $bindings = [];
 
     public function __construct(string $table, BDDFactory $bddFactory)
@@ -42,11 +52,15 @@ final class QueryBuilder
      */
     public function select(array|string $columns = '*'): self
     {
-        if (\is_string($columns)) {
-            $this->columns = [$columns];
-        } else {
-            $this->columns = $columns;
+        $columns = \is_string($columns) ? [$columns] : $columns;
+
+        foreach ($columns as $column) {
+            if ('*' !== $column) {
+                $this->assertIdentifier($column);
+            }
         }
+
+        $this->columns = $columns;
 
         return $this;
     }
@@ -55,22 +69,25 @@ final class QueryBuilder
      * Ajoute une condition WHERE
      *
      * @param string $column   Nom de la colonne
-     * @param string $operator Opérateur (=, <, >, <=, >=, !=, LIKE, etc.)
-     * @param mixed  $value    Valeur à comparer
+     * @param string $operator Opérateur (=, !=, <>, <, <=, >, >=, LIKE, NOT LIKE)
+     * @param mixed  $value    Valeur à comparer (pour NULL : whereNull() / whereNotNull())
      */
-    public function where(string $column, string $operator = '=', mixed $value = null): self
+    public function where(string $column, string $operator, mixed $value): self
     {
-        // Gestion du cas where('column', value) sans opérateur
-        if (null === $value && '=' !== $operator) {
-            $value = $operator;
-            $operator = '=';
+        $this->assertIdentifier($column);
+
+        $operator = \strtoupper($operator);
+        if (!\in_array($operator, self::OPERATORS, true)) {
+            throw new \InvalidArgumentException('Invalid operator: '.$operator);
         }
 
-        $this->wheres[] = [
-            'column' => $column,
-            'operator' => $operator,
-            'value' => $value,
-        ];
+        // « colonne = NULL » ne correspond jamais à rien en SQL
+        if (null === $value) {
+            throw new \InvalidArgumentException('NULL value in where(): use whereNull() or whereNotNull() instead.');
+        }
+
+        $this->wheres[] = $column.' '.$operator.' ?';
+        $this->bindings[] = $value;
 
         return $this;
     }
@@ -83,16 +100,14 @@ final class QueryBuilder
      */
     public function whereIn(string $column, array $values): self
     {
+        $this->assertIdentifier($column);
+
         if (empty($values)) {
             return $this;
         }
 
         $placeholders = \array_map(fn () => '?', $values);
-        $this->wheres[] = [
-            'column' => $column,
-            'operator' => 'IN',
-            'value' => '('.\implode(', ', $placeholders).')',
-        ];
+        $this->wheres[] = $column.' IN ('.\implode(', ', $placeholders).')';
 
         foreach ($values as $val) {
             $this->bindings[] = $val;
@@ -110,11 +125,33 @@ final class QueryBuilder
      */
     public function whereBetween(string $column, mixed $min, mixed $max): self
     {
-        $this->wheres[] = [
-            'column' => $column,
-            'operator' => 'BETWEEN',
-            'value' => ['min' => $min, 'max' => $max],
-        ];
+        $this->assertIdentifier($column);
+
+        $this->wheres[] = $column.' BETWEEN ? AND ?';
+        $this->bindings[] = $min;
+        $this->bindings[] = $max;
+
+        return $this;
+    }
+
+    /**
+     * Ajoute une condition WHERE colonne IS NULL
+     */
+    public function whereNull(string $column): self
+    {
+        $this->assertIdentifier($column);
+        $this->wheres[] = $column.' IS NULL';
+
+        return $this;
+    }
+
+    /**
+     * Ajoute une condition WHERE colonne IS NOT NULL
+     */
+    public function whereNotNull(string $column): self
+    {
+        $this->assertIdentifier($column);
+        $this->wheres[] = $column.' IS NOT NULL';
 
         return $this;
     }
@@ -127,6 +164,8 @@ final class QueryBuilder
      */
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
+        $this->assertIdentifier($column);
+
         $direction = \strtoupper($direction);
         if (!\in_array($direction, ['ASC', 'DESC'], true)) {
             throw new \InvalidArgumentException('Invalid order direction: '.$direction);
@@ -167,27 +206,7 @@ final class QueryBuilder
      */
     public function get(): array
     {
-        $sql = $this->toSql();
-        $pdo = $this->bddFactory->getConnection();
-        $stmt = $pdo->prepare($sql);
-
-        // Binding des paramètres
-        $index = 1;
-        foreach ($this->wheres as $where) {
-            if ('IN' === $where['operator'] || 'BETWEEN' === $where['operator']) {
-                continue;
-            }
-            $stmt->bindValue($index++, $where['value']);
-        }
-
-        // Binding des valeurs from whereIn/whereBetween
-        foreach ($this->bindings as $binding) {
-            $stmt->bindValue($index++, $binding);
-        }
-
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $this->execute($this->toSql())->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -195,24 +214,7 @@ final class QueryBuilder
      */
     public function count(): int
     {
-        $sql = $this->buildCountSql();
-        $pdo = $this->bddFactory->getConnection();
-        $stmt = $pdo->prepare($sql);
-
-        $index = 1;
-        foreach ($this->wheres as $where) {
-            if ('IN' === $where['operator'] || 'BETWEEN' === $where['operator']) {
-                continue;
-            }
-            $stmt->bindValue($index++, $where['value']);
-        }
-
-        foreach ($this->bindings as $binding) {
-            $stmt->bindValue($index++, $binding);
-        }
-
-        $stmt->execute();
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $result = $this->execute($this->buildCountSql())->fetch(\PDO::FETCH_ASSOC);
 
         return (int) ($result['count'] ?? 0);
     }
@@ -239,6 +241,32 @@ final class QueryBuilder
     }
 
     /**
+     * Prépare la requête et lie les valeurs dans l'ordre des « ? »
+     */
+    private function execute(string $sql): \PDOStatement
+    {
+        $stmt = $this->bddFactory->getConnection()->prepare($sql);
+
+        foreach ($this->bindings as $index => $value) {
+            $stmt->bindValue($index + 1, $value);
+        }
+
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+    /**
+     * Refuse tout nom de colonne qui n'est pas un identifiant simple (protection contre l'injection SQL)
+     */
+    private function assertIdentifier(string $column): void
+    {
+        if (1 !== \preg_match(self::IDENTIFIER, $column)) {
+            throw new \InvalidArgumentException('Invalid column name: '.$column);
+        }
+    }
+
+    /**
      * Construit la requête SQL
      */
     private function toSql(): string
@@ -247,7 +275,7 @@ final class QueryBuilder
         $sql = 'SELECT '.$columns.' FROM '.$this->table;
 
         if (!empty($this->wheres)) {
-            $sql .= ' WHERE '.$this->buildWhereClauses();
+            $sql .= ' WHERE '.\implode(' AND ', $this->wheres);
         }
 
         if (!empty($this->orders)) {
@@ -263,30 +291,6 @@ final class QueryBuilder
         }
 
         return $sql;
-    }
-
-    /**
-     * Construit les clauses WHERE
-     */
-    private function buildWhereClauses(): string
-    {
-        $clauses = [];
-
-        foreach ($this->wheres as $where) {
-            $column = $where['column'];
-            $operator = $where['operator'];
-
-            if ('IN' === $operator) {
-                $clauses[] = $column.' '.$where['value'];
-            } elseif ('BETWEEN' === $operator) {
-                $clauses[] = $column.' BETWEEN ? AND ?';
-            // Les valeurs seront bindées séparément
-            } else {
-                $clauses[] = $column.' '.$operator.' ?';
-            }
-        }
-
-        return \implode(' AND ', $clauses);
     }
 
     /**
@@ -308,7 +312,7 @@ final class QueryBuilder
         $sql = 'SELECT COUNT(*) as count FROM '.$this->table;
 
         if (!empty($this->wheres)) {
-            $sql .= ' WHERE '.$this->buildWhereClauses();
+            $sql .= ' WHERE '.\implode(' AND ', $this->wheres);
         }
 
         return $sql;

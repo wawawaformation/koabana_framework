@@ -8,6 +8,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use Koabana\Http\Middleware\CsrfMiddleware;
 use Koabana\Http\Session\SessionBag;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -145,5 +146,68 @@ final class CsrfMiddlewareTest extends TestCase
         $response = $this->middleware->process($postRequest, $this->handler);
 
         self::assertEquals(200, $response->getStatusCode());
+    }
+
+    public function testMissingSessionIsReported(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('SessionMiddleware');
+
+        $this->middleware->process(new ServerRequest('GET', 'http://localhost/'), $this->handler);
+    }
+
+    public function testValidTokenInHeaderPasses(): void
+    {
+        $request = $this->post('PUT', '/profil')->withHeader('X-CSRF-Token', $this->token());
+
+        self::assertSame(200, $this->middleware->process($request, $this->handler)->getStatusCode());
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     */
+    #[DataProvider('invalidBodies')]
+    public function testInvalidBodyTokenIsRefused(string $method, array $body): void
+    {
+        $this->token();
+
+        $response = $this->middleware->process($this->post($method, '/form')->withParsedBody($body), $this->handler);
+
+        self::assertSame(403, $response->getStatusCode());
+    }
+
+    /**
+     * @return iterable<string, array{string, array<string, mixed>}>
+     */
+    public static function invalidBodies(): iterable
+    {
+        yield 'jeton absent (DELETE)' => ['DELETE', []];
+
+        yield 'mauvais jeton (PATCH)' => ['PATCH', ['_csrf_token' => 'faux']];
+
+        // _csrf_token[]=x : un tableau ne doit pas provoquer d'avertissement PHP, mais un refus
+        yield 'jeton envoyé en tableau' => ['POST', ['_csrf_token' => ['x']]];
+    }
+
+    public function testExemptionNeedsTheWholePrefix(): void
+    {
+        $this->token();
+
+        // « /api/* » exempte /api/… mais pas /apiculture
+        self::assertSame(200, $this->middleware->process($this->post('POST', '/api/v1/items'), $this->handler)->getStatusCode());
+        self::assertSame(403, $this->middleware->process($this->post('POST', '/apiculture'), $this->handler)->getStatusCode());
+    }
+
+    private function token(): string
+    {
+        $request = new ServerRequest('GET', 'http://localhost/')->withAttribute('session', $this->session);
+        $this->middleware->process($request, $this->handler);
+
+        return (string) $this->session->get('_csrf_token');
+    }
+
+    private function post(string $method, string $path): ServerRequest
+    {
+        return new ServerRequest($method, 'http://localhost'.$path)->withAttribute('session', $this->session);
     }
 }

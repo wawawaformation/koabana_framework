@@ -54,7 +54,7 @@ abstract class ControllerTestCase extends TestCase
         $request = new ServerRequest($method, $uri)
             ->withAttribute('session', $session)
             ->withAttribute('flash', new FlashBag($session))
-            ->withAttribute('profile', new ProfileBag($session))
+            ->withAttribute('profile', new ProfileBag($session->bag('profile')))
             ->withAttribute('csrf_token', 'jeton-csrf')
         ;
 
