@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Koabana\Http\Middleware;
 
-use GuzzleHttp\Psr7\Response;
 use Koabana\Http\Session\SessionBag;
+use League\Route\Http\Exception\ForbiddenException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -35,6 +35,8 @@ final class CsrfMiddleware implements MiddlewareInterface
      * @param RequestHandlerInterface $handler
      *
      * @return ResponseInterface
+     *
+     * @throws ForbiddenException Jeton absent ou invalide sur POST / PUT / PATCH / DELETE
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -59,11 +61,8 @@ final class CsrfMiddleware implements MiddlewareInterface
             // Exemption de routes
             if (!$this->isExempted($path)) {
                 if (!$this->validateToken($request, $token)) {
-                    return new Response(
-                        403,
-                        ['Content-Type' => 'text/plain; charset=utf-8'],
-                        'Token CSRF invalide ou manquant',
-                    );
+                    // Page 403 produite par ErrorHandlerMiddleware (HTML ou JSON)
+                    throw new ForbiddenException('Token CSRF invalide ou manquant');
                 }
             }
         }

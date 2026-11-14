@@ -9,6 +9,7 @@ use Koabana\Http\Session\FlashBag;
 use Koabana\Http\Session\ProfileBag;
 use Koabana\Http\Session\SessionBag;
 use Koabana\View\PhpTemplateRenderer;
+use League\Route\Http\Exception\NotFoundException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\ExposedController;
@@ -69,13 +70,17 @@ final class AbstractControllerTest extends TestCase
         self::assertSame('image/svg+xml', $response->getHeaderLine('Content-Type'));
     }
 
-    public function testTextAndNotFoundResponses(): void
+    public function testTextResponse(): void
     {
         self::assertSame('text/plain; charset=utf-8', $this->controller->callText('Bonjour')->getHeaderLine('Content-Type'));
+    }
 
-        $notFound = $this->controller->callNotFound();
-        self::assertSame(404, $notFound->getStatusCode());
-        self::assertSame('Not Found', (string) $notFound->getBody());
+    public function testNotFoundThrowsSoTheErrorPageIsShown(): void
+    {
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Article introuvable');
+
+        $this->controller->callNotFound();
     }
 
     public function testJsonResponseKeepsUnicodeAndSlashes(): void

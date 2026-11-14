@@ -10,6 +10,7 @@ use Koabana\Http\Session\FlashBag;
 use Koabana\Http\Session\ProfileBag;
 use Koabana\Http\Session\SessionBag;
 use Koabana\View\PhpTemplateRenderer;
+use League\Route\Http\Exception\NotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -241,15 +242,16 @@ abstract class AbstractController
     }
 
     /**
-     * Retourne une réponse HTTP 404.
+     * Interrompt l'action par une 404 : ErrorHandlerMiddleware affiche la page d'erreur.
+     * S'utilise comme avant : « return $this->notFound(); ».
      *
-     * @param string $message Message affiché
+     * @param string $message Message technique (journal uniquement, jamais affiché)
      *
-     * @return ResponseInterface Réponse HTTP 404
+     * @throws NotFoundException
      */
-    protected function notFound(string $message = 'Not Found'): ResponseInterface
+    protected function notFound(string $message = 'Not Found'): never
     {
-        return $this->text($message, 404);
+        throw new NotFoundException($message);
     }
 
     /**

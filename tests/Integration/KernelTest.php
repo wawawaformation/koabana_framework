@@ -7,6 +7,7 @@ namespace Tests\Integration;
 use GuzzleHttp\Psr7\ServerRequest;
 use Koabana\Bootstrap\ContainerFactory;
 use Koabana\Bootstrap\RouterFactory;
+use Koabana\Http\HttpErrorResponder;
 use Koabana\Http\Kernel;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -50,6 +51,40 @@ final class KernelTest extends TestCase
     public function testUnknownRouteIsA404(): void
     {
         self::assertSame(404, $this->handle('GET', '/inexistant')->getStatusCode());
+    }
+
+    public function testUnknownRouteShowsTheErrorPage(): void
+    {
+        $response = $this->handle('GET', '/inexistant');
+
+        self::assertSame(404, $response->getStatusCode());
+        self::assertSame('text/html; charset=utf-8', $response->getHeaderLine('Content-Type'));
+        self::assertStringContainsString('<h1>Page introuvable</h1>', (string) $response->getBody());
+    }
+
+    public function testWrongMethodListsAllowedMethods(): void
+    {
+        // GET n'est pas contrôlé par CSRF : la requête atteint le routeur (DELETE serait refusé avant, en 403)
+        $response = $this->handle('GET', '/deconnexion');
+
+        self::assertSame(405, $response->getStatusCode());
+        self::assertSame('POST', $response->getHeaderLine('Allow'));
+        self::assertStringContainsString('Méthode non autorisée', (string) $response->getBody());
+    }
+
+    public function testCsrfRefusalShowsTheErrorPage(): void
+    {
+        $response = $this->handle('POST', '/connexion');
+
+        self::assertSame(403, $response->getStatusCode());
+        self::assertStringContainsString('votre session a expiré', (string) $response->getBody());
+    }
+
+    public function testErrorInJsonWhenAsked(): void
+    {
+        $response = $this->handle('GET', '/inexistant', headers: ['Accept' => 'application/json']);
+
+        self::assertSame('{"status":404,"error":"Page introuvable"}', (string) $response->getBody());
     }
 
     public function testTrailingSlashIsRedirected(): void
@@ -111,12 +146,15 @@ final class KernelTest extends TestCase
         self::assertSame('DENY', $response->getHeaderLine('X-Frame-Options'));
     }
 
-    private function handle(string $method, string $path, string $routesFile = self::ROOT.'/config/routes.php'): ResponseInterface
+    /**
+     * @param array<string, string> $headers
+     */
+    private function handle(string $method, string $path, string $routesFile = self::ROOT.'/config/routes.php', array $headers = []): ResponseInterface
     {
         $container = ContainerFactory::create(self::ROOT.'/config/containers.php');
-        $kernel = new Kernel(RouterFactory::create($container, $routesFile), $this->logger());
+        $kernel = new Kernel(RouterFactory::create($container, $routesFile), $this->logger(), $container->get(HttpErrorResponder::class));
 
-        return $kernel->handle(new ServerRequest($method, 'http://localhost'.$path));
+        return $kernel->handle(new ServerRequest($method, 'http://localhost'.$path, $headers));
     }
 
     private function handleWithCrashingRoute(): ResponseInterface

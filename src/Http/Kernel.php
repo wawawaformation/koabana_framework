@@ -22,12 +22,14 @@ final class Kernel implements RequestHandlerInterface
     private Relay $relay;
 
     /**
-     * @param Router          $router
-     * @param LoggerInterface $logger
+     * @param Router             $router
+     * @param LoggerInterface    $logger
+     * @param HttpErrorResponder $errors Pages d'erreur 4xx, transmises à ErrorHandlerMiddleware
      */
     public function __construct(
         private readonly Router $router,
         private readonly LoggerInterface $logger,
+        private readonly HttpErrorResponder $errors,
     ) {
         $queue = require __DIR__.'/../../config/middlewares.php';
         $appEnv = (string) (getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? 'prod'));
@@ -38,7 +40,7 @@ final class Kernel implements RequestHandlerInterface
         array_unshift(
             $queue,
             new SecurityHeadersMiddleware(),
-            new ErrorHandlerMiddleware($this->logger, $displayErrors),
+            new ErrorHandlerMiddleware($this->logger, $displayErrors, $this->errors),
         );
 
         $queue[] = new class($this->router) implements MiddlewareInterface {

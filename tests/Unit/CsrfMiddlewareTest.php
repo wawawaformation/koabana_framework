@@ -8,6 +8,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use Koabana\Http\Middleware\CsrfMiddleware;
 use Koabana\Http\Session\SessionBag;
+use League\Route\Http\Exception\ForbiddenException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
@@ -89,7 +90,7 @@ final class CsrfMiddlewareTest extends TestCase
         self::assertEquals(200, $response->getStatusCode());
     }
 
-    public function testPostRequestWithInvalidTokenReturns403(): void
+    public function testPostRequestWithInvalidTokenIsForbidden(): void
     {
         $request = new ServerRequest('GET', 'http://localhost/');
         $request = $request->withAttribute('session', $this->session);
@@ -102,9 +103,9 @@ final class CsrfMiddlewareTest extends TestCase
         );
         $postRequest = $postRequest->withAttribute('session', $this->session);
 
-        $response = $this->middleware->process($postRequest, $this->handler);
+        $this->expectException(ForbiddenException::class);
 
-        self::assertEquals(403, $response->getStatusCode());
+        $this->middleware->process($postRequest, $this->handler);
     }
 
     public function testExemptedPathsSkipCsrfValidation(): void
@@ -171,9 +172,9 @@ final class CsrfMiddlewareTest extends TestCase
     {
         $this->token();
 
-        $response = $this->middleware->process($this->post($method, '/form')->withParsedBody($body), $this->handler);
+        $this->expectException(ForbiddenException::class);
 
-        self::assertSame(403, $response->getStatusCode());
+        $this->middleware->process($this->post($method, '/form')->withParsedBody($body), $this->handler);
     }
 
     /**
@@ -195,7 +196,9 @@ final class CsrfMiddlewareTest extends TestCase
 
         // « /api/* » exempte /api/… mais pas /apiculture
         self::assertSame(200, $this->middleware->process($this->post('POST', '/api/v1/items'), $this->handler)->getStatusCode());
-        self::assertSame(403, $this->middleware->process($this->post('POST', '/apiculture'), $this->handler)->getStatusCode());
+
+        $this->expectException(ForbiddenException::class);
+        $this->middleware->process($this->post('POST', '/apiculture'), $this->handler);
     }
 
     private function token(): string

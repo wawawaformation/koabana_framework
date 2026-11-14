@@ -236,11 +236,8 @@ $this->text('Succès');
 // Redirection
 $this->redirect('/path');
 
-// Erreurs HTTP
-$this->notFound($request);           // 404
-$this->forbidden($request);           // 403
-$this->badRequest($request);          // 400
-$this->serverError($request);         // 500
+// Erreur 404 : affiche la page d'erreur (voir « Pages d'erreur »)
+return $this->notFound();
 ```
 
 #### Données postées
@@ -263,6 +260,41 @@ $this->addFlash($request, 'success', 'Opération réussie !');
 $this->addFlash($request, 'error', 'Une erreur s\'est produite.');
 $this->addFlash($request, 'info', 'Information');
 ```
+
+### Pages d'erreur
+
+Toutes les erreurs 4xx (route inconnue, mauvaise méthode, jeton CSRF refusé, `notFound()`) sont
+transformées en réponse par `ErrorHandlerMiddleware`, via `HttpErrorResponder` :
+
+- **HTML** : template `templates/errors/error.php` dans le layout, avec `$status`, `$title` et `$message`
+  (textes en français ; le message technique de l'exception va seulement dans le journal) ;
+- **surcharge par code** : si `templates/errors/{code}.php` existe (ex. `errors/404.php`), il remplace `error.php` pour ce code ;
+- **JSON** si l'en-tête `Accept` contient `json` : `{"status":404,"error":"Page introuvable"}`.
+
+Pour produire une 4xx depuis un contrôleur, on **lève une exception** de League Route :
+
+```php
+use League\Route\Http\Exception\BadRequestException;
+use League\Route\Http\Exception\ForbiddenException;
+
+public function show(ServerRequestInterface $request, array $args): ResponseInterface
+{
+    $post = $this->posts->findById((int) $args['id']);
+    if (null === $post) {
+        return $this->notFound();              // 404 (raccourci pour throw new NotFoundException())
+    }
+
+    if (!$this->isLogged($request)) {
+        throw new ForbiddenException();        // 403
+    }
+
+    // throw new BadRequestException();       // 400, etc.
+    // …
+}
+```
+
+Si le template d'erreur lui-même plante, la réponse retombe sur un texte brut (« Page introuvable »)
+et l'incident est journalisé.
 
 ---
 

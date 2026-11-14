@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Koabana\Http\Middleware;
 
 use GuzzleHttp\Psr7\Response;
+use Koabana\Http\HttpErrorResponder;
 use League\Route\Http\Exception\HttpExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,12 +21,14 @@ use Whoops\Run;
 final class ErrorHandlerMiddleware implements MiddlewareInterface
 {
     /**
-     * @param LoggerInterface $logger
-     * @param bool            $displayErrors
+     * @param LoggerInterface    $logger
+     * @param bool               $displayErrors
+     * @param HttpErrorResponder $errors        Pages d'erreur 4xx (HTML ou JSON)
      */
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly bool $displayErrors,
+        private readonly HttpErrorResponder $errors,
     ) {}
 
     /**
@@ -43,13 +46,11 @@ final class ErrorHandlerMiddleware implements MiddlewareInterface
             $this->logger->warning('HTTP exception', [
                 'status' => $exception->getStatusCode(),
                 'uri' => (string) $request->getUri(),
+                'message' => $exception->getMessage(),
             ]);
 
-            return new Response(
-                $exception->getStatusCode(),
-                ['Content-Type' => 'text/plain; charset=utf-8'] + $exception->getHeaders(),
-                $exception->getMessage(),
-            );
+            // Page d'erreur (HTML ou JSON) ; le message technique de l'exception reste dans le journal
+            return $this->errors->respond($request, $exception->getStatusCode(), $exception->getHeaders());
         } catch (\Throwable $exception) {
             $this->logger->error('Unhandled exception', [
                 'exception' => $exception,

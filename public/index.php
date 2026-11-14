@@ -10,6 +10,7 @@ use Dotenv\Dotenv;
 use GuzzleHttp\Psr7\ServerRequest;
 use Koabana\Bootstrap\ContainerFactory;
 use Koabana\Bootstrap\RouterFactory;
+use Koabana\Http\HttpErrorResponder;
 use Koabana\Http\Kernel;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Monolog\ErrorHandler;
@@ -37,7 +38,7 @@ ErrorHandler::register($logger);
 $router = RouterFactory::create($container, dirname(__DIR__).'/config/routes.php');
 
 // Création du noyau HTTP de l'application
-$kernel = new Kernel($router, $logger);
+$kernel = new Kernel($router, $logger, $container->get(HttpErrorResponder::class));
 
 // Gestion de la requête HTTP courante
 $request = ServerRequest::fromGlobals();

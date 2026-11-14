@@ -123,6 +123,19 @@ final class PhpTemplateRendererTest extends TestCase
         yield 'séparateur Windows' => ['pages\..\..\public\index'];
     }
 
+    public function testExistsTellsWhetherATemplateFileIsPresent(): void
+    {
+        self::assertTrue($this->renderer->exists('pages/hello'));
+        self::assertFalse($this->renderer->exists('pages/absente'));
+    }
+
+    public function testExistsRefusesParentSegments(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->renderer->exists('../secret');
+    }
+
     private function write(string $name, string $content): void
     {
         file_put_contents($this->dir.'/'.$name.'.php', $content);

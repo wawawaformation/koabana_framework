@@ -31,9 +31,9 @@ final class ExposedController extends AbstractController
         return $this->json($data);
     }
 
-    public function callNotFound(): ResponseInterface
+    public function callNotFound(): never
     {
-        return $this->notFound();
+        $this->notFound('Article introuvable');
     }
 
     public function callRedirect(string $location, int $status): ResponseInterface

@@ -75,6 +75,16 @@ final class PhpTemplateRenderer
     }
 
     /**
+     * Indique si un template existe (même règle de nom que render()).
+     *
+     * @throws \InvalidArgumentException Si le nom remonte hors du dossier des templates (« .. »)
+     */
+    public function exists(string $template): bool
+    {
+        return \is_file($this->path($template));
+    }
+
+    /**
      * Retourne le contexte de vue.
      *
      * Ce contexte est accessible dans tous les templates via la variable `$view`.
@@ -103,14 +113,7 @@ final class PhpTemplateRenderer
      */
     private function renderFile(string $template, array $data): string
     {
-        $template = \ltrim($template, '/\\');
-
-        // Aucun segment « .. » : un nom de template ne doit jamais sortir du dossier des templates
-        if (1 === \preg_match('#(^|[/\\\])\.\.([/\\\]|$)#', $template)) {
-            throw new \InvalidArgumentException('Invalid template name: '.$template);
-        }
-
-        $file = $this->templatesPath.DIRECTORY_SEPARATOR.$template.'.php';
+        $file = $this->path($template);
 
         if (!\is_file($file)) {
             throw new \RuntimeException('Template not found: '.$file);
@@ -137,5 +140,22 @@ final class PhpTemplateRenderer
         }
 
         return (string) \ob_get_clean();
+    }
+
+    /**
+     * Chemin du fichier d'un template, sans jamais sortir du dossier des templates.
+     *
+     * @throws \InvalidArgumentException Si le nom contient un segment « .. »
+     */
+    private function path(string $template): string
+    {
+        $template = \ltrim($template, '/\\');
+
+        // Aucun segment « .. » : un nom de template ne doit jamais sortir du dossier des templates
+        if (1 === \preg_match('#(^|[/\\\])\.\.([/\\\]|$)#', $template)) {
+            throw new \InvalidArgumentException('Invalid template name: '.$template);
+        }
+
+        return $this->templatesPath.DIRECTORY_SEPARATOR.$template.'.php';
     }
 }
