@@ -50,6 +50,15 @@ final class TemplatesTest extends TestCase
         yield 'tableau de bord' => ['dashboard/index', 'Tableau de bord'];
     }
 
+    public function testDashboardLogoutIsAPostFormWithCsrfToken(): void
+    {
+        $html = new PhpTemplateRenderer(\dirname(__DIR__, 2).'/templates')->render('dashboard/index', $this->data());
+
+        self::assertStringContainsString('<form method="post" action="/deconnexion">', $html);
+        self::assertStringContainsString('<input type="hidden" name="_csrf_token" value="jeton">', $html);
+        self::assertStringNotContainsString('href="/deconnexion"', $html);
+    }
+
     // Données transmises par les contrôleurs (et par AbstractController::render)
     /**
      * @return array<string, mixed>

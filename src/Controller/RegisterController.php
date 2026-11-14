@@ -64,9 +64,10 @@ final class RegisterController extends AbstractController
             $data = $request->getParsedBody() ?? [];
             $form->fill($data);
 
-            // on verifie que l'email n'est pas déjà utilisé
+            // on verifie que l'email n'est pas déjà utilisé par un compte actif ;
+            // un compte jamais activé (e-mail perdu, lien expiré, envoi en échec) reçoit un nouveau lien
             $existingUser = $this->userRepository->findByEmail(strip_tags($data['email'] ?? ''));
-            if ($existingUser) {
+            if ($existingUser && $existingUser->isActive()) {
                 $this->addFlash($request, 'error', 'Cette adresse e-mail est déjà utilisée. Veuillez en choisir une autre.');
 
                 return $this->render(
@@ -82,7 +83,10 @@ final class RegisterController extends AbstractController
             $expiresAt = new \DateTimeImmutable()->modify('+1 hour');
 
             if ($form->validate()) {
-                $user = new UserEntity();
+                // Avant toute écriture : sans APP_URL, on échoue sans créer de compte
+                $activationUrl = $this->appUrl().'/activate/'.$token;
+
+                $user = $existingUser ?? new UserEntity();
                 $user->setFirstname(strip_tags($data['firstname']))
                     ->setLastname(strip_tags($data['lastname']))
                     ->setEmail(strip_tags($data['email']))
@@ -90,19 +94,14 @@ final class RegisterController extends AbstractController
                     ->setTokenExpiresAt($expiresAt)
                 ;
 
-                $id = $this->userRepository->create($user);
+                if (null === $existingUser) {
+                    $this->userRepository->create($user);
+                } else {
+                    $this->userRepository->update($user);
+                }
 
                 // Tentative d'envoi de l'email d'activation
                 try {
-                    // Génère l'URL d'activation dynamique
-                    $uri = $request->getUri();
-                    $baseUrl = $uri->getScheme().'://'.$uri->getHost();
-                    if (('https' === $uri->getScheme() && 443 !== $uri->getPort())
-                        || ('http' === $uri->getScheme() && 80 !== $uri->getPort())) {
-                        $baseUrl .= ':'.$uri->getPort();
-                    }
-                    $activationUrl = $baseUrl.'/activate/'.$token;
-
                     $this->mailer->addAddress(strip_tags($data['email']), strip_tags($data['firstname'].' '.$data['lastname']));
                     $this->mailer->Subject = 'Terminer votre inscription';
                     $this->mailer->isHTML(true);
@@ -168,14 +167,6 @@ final class RegisterController extends AbstractController
             return $this->redirect('/inscription');
         }
 
-        // On efface le token et sa date d'expiration pour activer le compte
-        // $user->setToken(null)->setTokenExpiresAt(null);
-        // $this->userRepository->update($user);
-
-        // On active le compte.
-        $user->setIsActive(true);
-        $this->userRepository->update($user);
-
         // On prépare un formulaire de création de mot de passe pour la suite de l'inscription
         $form = new Form('set_password');
         $form->add(new PasswordInput('password', [
@@ -211,16 +202,14 @@ final class RegisterController extends AbstractController
                         ],
                     );
                 }
-                $passwordHash = password_hash($data['password'], PASSWORD_DEFAULT);
-                $user->setPasswordHash($passwordHash);
-                $this->userRepository->update($user);
-
-                // on oublie pas de supprimer le token d'activation et sa date d'expiration pour éviter toute réutilisation
+                // Le compte n'est activé qu'une fois le mot de passe créé ;
+                // le token est supprimé pour éviter toute réutilisation du lien
                 $user
+                    ->setPasswordHash(password_hash($data['password'], PASSWORD_DEFAULT))
+                    ->setIsActive(true)
                     ->setToken(null)
                     ->setTokenExpiresAt(null)
                 ;
-
                 $this->userRepository->update($user);
 
                 $this->addFlash($request, 'success', 'Votre mot de passe a été créé avec succès ! Vous pouvez maintenant vous connecter.');

@@ -10,6 +10,7 @@ use Koabana\View\ViewContext;
 
 /** @var ViewContext $view */
 /** @var array<string, mixed> $profile */
+/** @var string $csrf_token */
 ?>
 
 <?php $view->start('title') ?>Tableau de bord<?php $view->end('title') ?>
@@ -23,4 +24,8 @@ use Koabana\View\ViewContext;
     <li>Prénom : <?= $view->e((string) ($profile['user_firstname'] ?? '')) ?></li>
     <li>E-mail : <?= $view->e((string) ($profile['user_email'] ?? '')) ?></li>
 </ul>
-<p><a href="/deconnexion">Se déconnecter</a></p>
+<!-- Déconnexion en POST + jeton CSRF : un site tiers ne peut pas la déclencher -->
+<form method="post" action="/deconnexion">
+    <input type="hidden" name="_csrf_token" value="<?= $view->e($csrf_token) ?>">
+    <button type="submit">Se déconnecter</button>
+</form>

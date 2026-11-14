@@ -14,8 +14,7 @@ namespace Koabana\Database;
  * - Désactivation de l'émulation des requêtes préparées (sécurité / cohérence)
  *
  * Note :
- * - L'option MySQL `MYSQL_ATTR_INIT_COMMAND` est appliquée uniquement si le DSN
- *   cible MySQL (préfixe `mysql:`).
+ * - Pour MySQL, l'encodage se règle dans le DSN (ex. `charset=utf8mb4`).
  */
 class MyPDO extends \PDO
 {
@@ -39,11 +38,6 @@ class MyPDO extends \PDO
             $this->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             $this->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
             $this->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
-
-            // Applique uniquement l'option spécifique MySQL lorsque le DSN cible MySQL
-            if (\str_starts_with($dsn, 'mysql:')) {
-                $this->setAttribute(\PDO::MYSQL_ATTR_INIT_COMMAND, "SET NAMES 'utf8'");
-            }
         } catch (\PDOException $e) {
             // Gestion personnalisée des erreurs de connexion PDO
             throw new \PDOException('Échec de la connexion à la base de données : '.$e->getMessage(), (int) $e->getCode(), $e);

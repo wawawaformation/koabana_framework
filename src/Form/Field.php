@@ -76,6 +76,11 @@ abstract class Field
         return !empty($this->errors);
     }
 
+    public function clearErrors(): void
+    {
+        $this->errors = [];
+    }
+
     /**
      * Méthode abstraite pour le rendu HTML
      */
@@ -135,7 +140,9 @@ abstract class Field
             $html .= " max=\"{$max}\"";
         }
 
-        if ($this->hasRule('regex')) {
+        // L'attribut HTML pattern n'accepte pas de drapeaux (ex. /i) :
+        // dans ce cas, seule la validation côté serveur s'applique
+        if ($this->hasRule('regex') && 1 !== preg_match('#/[a-zA-Z]+$#', (string) $this->getRule('regex'))) {
             $pattern = (string) $this->getRule('regex');
             // Nettoie le pattern en enlevant les délimiteurs regex
             $pattern = preg_replace('#^/|/$#', '', $pattern);

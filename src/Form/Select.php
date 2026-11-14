@@ -32,7 +32,8 @@ class Select extends Field
         $html = "<select name=\"{$this->name}\"{$attributes}>";
 
         foreach ($this->options as $value => $label) {
-            $selected = $this->value === $value ? ' selected' : '';
+            // Comparaison en chaîne : une valeur postée ('2') doit correspondre à une clé numérique (2)
+            $selected = is_scalar($this->value) && (string) $this->value === (string) $value ? ' selected' : '';
             $value = htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
             $label = htmlspecialchars((string) $label, ENT_QUOTES, 'UTF-8');
             $html .= "<option value=\"{$value}\"{$selected}>{$label}</option>";

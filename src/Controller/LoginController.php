@@ -57,26 +57,33 @@ final class LoginController extends AbstractController
 
             if ($form->Validate()) {
                 $hash = $this->userRepository->findPassword($data['email']);
-                if ($hash && password_verify($data['password'], $hash)) {
-                    $user = $this->userRepository->findByEmail($data['email']);
-                    if ($user) {
-                        $profile = $request->getAttribute('profile');
-                        if ($profile) {
-                            $profile->set([
-                                'user_id' => $user->getId(),
-                                'user_firstname' => $user->getFirstname(),
-                                'user_lastname' => $user->getLastname(),
-                                'user_email' => $user->getEmail(),
-                            ]);
-                        }
+                $user = $hash && password_verify($data['password'], $hash)
+                    ? $this->userRepository->findByEmail($data['email'])
+                    : null;
 
-                        $this->addFlash($request, 'success', 'Connexion réussie !');
-
-                        return $this->redirect('/mon-espace');
+                // Compte inactif : même message qu'un mauvais mot de passe, pour ne pas révéler son état
+                if (null !== $user && $user->isActive()) {
+                    // Nouvel identifiant de session : protège contre la fixation de session
+                    if (PHP_SESSION_ACTIVE === session_status()) {
+                        session_regenerate_id(true);
                     }
-                } else {
-                    $this->addFlash($request, 'error', 'Email ou mot de passe incorrect.');
+
+                    $profile = $request->getAttribute('profile');
+                    if ($profile) {
+                        $profile->set([
+                            'user_id' => $user->getId(),
+                            'user_firstname' => $user->getFirstname(),
+                            'user_lastname' => $user->getLastname(),
+                            'user_email' => $user->getEmail(),
+                        ]);
+                    }
+
+                    $this->addFlash($request, 'success', 'Connexion réussie !');
+
+                    return $this->redirect('/mon-espace');
                 }
+
+                $this->addFlash($request, 'error', 'Email ou mot de passe incorrect.');
             }
         }
 
@@ -117,17 +124,18 @@ final class LoginController extends AbstractController
             if ($form->Validate()) {
                 $user = $this->userRepository->findByEmail($data['email']);
                 if ($user) {
+                    // Avant toute écriture : sans APP_URL, on échoue sans générer de token
+                    $baseUrl = $this->appUrl();
+
                     // Générer un token de réinitialisation
                     $token = bin2hex(random_bytes(16));
                     $user->setToken($token);
                     $user->setTokenExpiresAt(new \DateTimeImmutable()->modify('+1 hour'));
                     $this->userRepository->update($user);
 
-                    $baseUrl = $this->getBaseUrl($request);
                     $resetUrl = $baseUrl.'/reinitialisation-mot-de-passe/'.$token;
 
                     try {
-                        $this->mailer->setFrom('contact@koabana.fr', 'Koabana');
                         $this->mailer->addAddress(strip_tags($data['email']));
                         $this->mailer->Subject = 'Réinitialisation de votre mot de passe';
                         $this->mailer->isHTML(true);
@@ -186,7 +194,7 @@ final class LoginController extends AbstractController
             }
             $this->addFlash($request, 'error', 'Lien de réinitialisation invalide ou expiré. Veuillez recommencer la réinitialisation.');
 
-            return $this->redirect('/mot-de-passe-oublie');
+            return $this->redirect('/utilisateur/mot-de-passe-oublie');
         }
 
         $form = new Form('reset_password');
@@ -220,6 +228,8 @@ final class LoginController extends AbstractController
                     );
                 } else {
                     $user->setPasswordHash(password_hash($data['password'], PASSWORD_DEFAULT));
+                    // La réinitialisation prouve la possession de l'adresse : le compte est activé
+                    $user->setIsActive(true);
                     $user->setToken(null)->setTokenExpiresAt(null);
                     $this->userRepository->update($user);
 

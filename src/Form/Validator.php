@@ -6,31 +6,29 @@ namespace Koabana\Form;
 
 class Validator
 {
-    /** @var array<string, array<string>> */
-    private array $errors = [];
-
     /**
-     * Valide un ensemble de champs selon leurs règles
+     * Valide un ensemble de champs selon leurs règles.
+     * Les erreurs sont stockées dans chaque Field.
      *
      * @param array<Field> $fields
+     *
+     * @return bool true si aucun champ n'a d'erreur
      */
     public function validate(array $fields): bool
     {
-        $this->errors = [];
+        $isValid = true;
 
-        /** @var Field $field */
         foreach ($fields as $field) {
+            // Repart de zéro : une validation précédente ne doit pas laisser d'erreurs
+            $field->clearErrors();
             $this->validateField($field);
+
+            if ($field->hasErrors()) {
+                $isValid = false;
+            }
         }
 
-        return empty($this->errors);
-    }
-
-    /** @return array<string, array<string>> */
-    public function getErrors(): array
-    {
-        return [];
-        // Les erreurs sont directement stockées dans les Field
+        return $isValid;
     }
 
     /**
@@ -64,14 +62,14 @@ class Validator
 
         if (isset($rules['minLength'])) {
             $minLength = (int) $rules['minLength'];
-            if (strlen((string) $value) < $minLength) {
+            if (mb_strlen((string) $value) < $minLength) {
                 $field->addError("Minimum {$minLength} caractères requis.");
             }
         }
 
         if (isset($rules['maxLength'])) {
             $maxLength = (int) $rules['maxLength'];
-            if (strlen((string) $value) > $maxLength) {
+            if (mb_strlen((string) $value) > $maxLength) {
                 $field->addError("Maximum {$maxLength} caractères.");
             }
         }

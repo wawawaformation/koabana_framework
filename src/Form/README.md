@@ -93,6 +93,8 @@ Règles disponibles (passées dans les attributs) :
 | `max` | int | `'max' => 100` |
 | `regex` | string | `'regex' => '/^[a-z]+$/i'` |
 
+> Une regex avec drapeaux (ex. `/i`) n'est pas reprise dans l'attribut HTML `pattern`, qui ne les accepte pas : elle n'est vérifiée que côté serveur.
+
 ## Exemple complet
 
 ### Création et utilisation basique

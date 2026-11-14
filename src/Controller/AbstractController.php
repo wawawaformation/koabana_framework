@@ -76,6 +76,25 @@ abstract class AbstractController
     }
 
     /**
+     * Retourne l'URL publique de l'application (variable d'environnement APP_URL), sans « / » final.
+     *
+     * À utiliser pour les liens envoyés par e-mail : l'en-tête Host de la requête est fourni
+     * par le client et peut être falsifié (empoisonnement des liens de réinitialisation).
+     *
+     * @throws \RuntimeException si APP_URL n'est pas configurée
+     */
+    protected function appUrl(): string
+    {
+        $appUrl = getenv('APP_URL');
+
+        if (false === $appUrl || '' === $appUrl) {
+            throw new \RuntimeException('APP_URL non configurée : impossible de construire les liens envoyés par e-mail.');
+        }
+
+        return rtrim($appUrl, '/');
+    }
+
+    /**
      * Rend un template de vue et retourne une réponse HTTP HTML.
      *
      * Utilise le moteur de rendu PHP pour générer le contenu HTML à partir d'un template,
@@ -347,7 +366,7 @@ abstract class AbstractController
         if (!$this->profile($request)->isLogged()) {
             $this->addFlash($request, 'danger', 'Vous devez être connecté(e) pour accéder à cette page.');
 
-            return $this->redirect('/auth/login');
+            return $this->redirect('/connexion');
         }
 
         return null;

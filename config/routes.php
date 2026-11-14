@@ -23,7 +23,7 @@ return [
 
     ['GET', '/connexion', [\Koabana\Controller\LoginController::class, 'login']],
     ['POST', '/connexion', [\Koabana\Controller\LoginController::class, 'login']],
-    ['GET', '/deconnexion', [\Koabana\Controller\LoginController::class, 'logout']],
+    ['POST', '/deconnexion', [\Koabana\Controller\LoginController::class, 'logout']],
     ['GET', '/utilisateur/mot-de-passe-oublie', [\Koabana\Controller\LoginController::class, 'forgotPassword']],
     ['POST', '/utilisateur/mot-de-passe-oublie', [\Koabana\Controller\LoginController::class, 'forgotPassword']],
     ['GET', '/reinitialisation-mot-de-passe/{token: [a-f0-9]{32}}', [\Koabana\Controller\LoginController::class, 'resetPassword']],
@@ -33,8 +33,8 @@ return [
     ['GET', '/inscription', [\Koabana\Controller\RegisterController::class, 'register']],
     ['POST', '/inscription', [\Koabana\Controller\RegisterController::class, 'register']],
     ['GET', '/inscription/success', [\Koabana\Controller\RegisterController::class, 'success']],
-    ['GET', '/activate/{token: [a-f0-9]{16}}', [\Koabana\Controller\RegisterController::class, 'activate']],
-    ['POST', '/activate/{token: [a-f0-9]{16}}', [\Koabana\Controller\RegisterController::class, 'activate']],
+    ['GET', '/activate/{token: [a-f0-9]{32}}', [\Koabana\Controller\RegisterController::class, 'activate']],
+    ['POST', '/activate/{token: [a-f0-9]{32}}', [\Koabana\Controller\RegisterController::class, 'activate']],
 
     ['GET', '/mon-espace', [\Koabana\Controller\DashboardController::class, 'index']],
 

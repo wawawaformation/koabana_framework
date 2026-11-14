@@ -48,7 +48,7 @@
     "test": "phpunit -c phpunit.xml",
     "test:coverage": [
       "phpunit -c phpunit.xml --coverage-filter src --coverage-clover var/clover.xml",
-      "php bin/coverage-check.php var/clover.xml 34"
+      "php bin/coverage-check.php var/clover.xml 69"
     ],
     "qa": [
       "@cs:check",

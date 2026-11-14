@@ -319,7 +319,6 @@ abstract class AbstractRepository
                     continue;
                 }
 
-                $prop->setAccessible(true);
                 $name = $prop->getName();
 
                 // On mappe propriété camelCase -> colonne snake_case

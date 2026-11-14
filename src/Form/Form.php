@@ -16,6 +16,13 @@ class Form
     private Validator $validator;
     private ?string $csrfToken = null;
 
+    /**
+     * Données de la requête, appliquées aux champs ajoutés après createFromRequest()
+     *
+     * @var null|array<string, mixed>
+     */
+    private ?array $requestData = null;
+
     public function __construct(string $name)
     {
         $this->name = $name;
@@ -28,6 +35,10 @@ class Form
     public function add(Field $field): void
     {
         $this->fields[$field->getName()] = $field;
+
+        if (null !== $this->requestData) {
+            $field->setValue($this->requestData[$field->getName()] ?? null);
+        }
     }
 
     /**
@@ -218,7 +229,8 @@ class Form
     public static function createFromRequest(string $name, ServerRequestInterface $request): self
     {
         $form = new self($name);
-        $form->fill((array) $request->getParsedBody());
+        // Les champs n'existent pas encore : les données sont mémorisées et appliquées par add()
+        $form->requestData = (array) $request->getParsedBody();
 
         return $form;
     }
