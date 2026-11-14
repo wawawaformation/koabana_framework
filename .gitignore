@@ -6,3 +6,4 @@
 !/cache/.gitkeep
 /vendor/
 .env
+/Makefile

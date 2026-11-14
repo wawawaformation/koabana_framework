@@ -46,11 +46,9 @@ final class ProfileBag
         return (string) $this->bag->get('user_firstname', '');
     }
 
-
-
     /**
      * Récupère le nom de l'utilisateur
-     * 
+     *
      * @return string
      */
     public function getLastname(): string

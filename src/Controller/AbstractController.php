@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Koabana\Controller;
 
 use GuzzleHttp\Psr7\Response;
+use Koabana\Form\Form;
 use Koabana\Http\Session\FlashBag;
 use Koabana\Http\Session\ProfileBag;
 use Koabana\Http\Session\SessionBag;
@@ -51,6 +52,27 @@ abstract class AbstractController
     public function __construct(PhpTemplateRenderer $view)
     {
         $this->view = $view;
+    }
+
+    /**
+     * Retourne l'URL de base de l'application (schéma + hôte + port si nécessaire) à partir de la requête.
+     *
+     * @param ServerRequestInterface $request Requête HTTP
+     *
+     * @return string URL de base
+     */
+    public function getBaseUrl(ServerRequestInterface $request): string
+    {
+        $uri = $request->getUri();
+        $baseUrl = $uri->getScheme().'://'.$uri->getHost();
+        if (
+            ('https' === $uri->getScheme() && 443 !== $uri->getPort())
+            || ('http' === $uri->getScheme() && 80 !== $uri->getPort())
+        ) {
+            $baseUrl .= ':'.$uri->getPort();
+        }
+
+        return $baseUrl;
     }
 
     /**
@@ -335,11 +357,11 @@ abstract class AbstractController
      * Ajoute une erreur à un champ du formulaire et crée un flash message.
      *
      * @param ServerRequestInterface $request   Requête HTTP
-     * @param \Koabana\Form\Form     $form      Formulaire concerné
+     * @param Form                   $form      Formulaire concerné
      * @param string                 $fieldName Nom du champ
      * @param string                 $message   Message d'erreur
      */
-    protected function addFieldError(ServerRequestInterface $request, \Koabana\Form\Form $form, string $fieldName, string $message): void
+    protected function addFieldError(ServerRequestInterface $request, Form $form, string $fieldName, string $message): void
     {
         $form->addError($fieldName, $message);
         $this->addFlash($request, 'error', $message);
@@ -368,27 +390,5 @@ abstract class AbstractController
         $headers[$name] = $value;
 
         return $headers;
-    }
-
-
-
-    /**
-     * Retourne l'URL de base de l'application (schéma + hôte + port si nécessaire) à partir de la requête.
-     * 
-     * @param ServerRequestInterface $request Requête HTTP
-     * @return string URL de base
-     */
-    public function getBaseUrl(ServerRequestInterface $request): string
-    {
-        $uri = $request->getUri();
-        $baseUrl = $uri->getScheme() . '://' . $uri->getHost();
-        if (
-            ($uri->getScheme() === 'https' && $uri->getPort() !== 443) ||
-            ($uri->getScheme() === 'http' && $uri->getPort() !== 80)
-        ) {
-            $baseUrl .= ':' . $uri->getPort();
-        }
-        return $baseUrl;
-
     }
 }

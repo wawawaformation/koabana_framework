@@ -104,28 +104,6 @@ abstract class Field
     }
 
     /**
-     * Retourne les attributs non-validation
-     */
-    private function getNonValidationAttributes(): string
-    {
-        /** @var array<string> $validationKeys */
-        $validationKeys = ['required', 'email', 'minLength', 'maxLength', 'regex', 'min', 'max', 'match', 'label', 'infos'];
-        $html = '';
-
-        foreach ($this->attributes as $key => $value) {
-            if (!in_array($key, $validationKeys, true)) {
-                if (true === $value) {
-                    $html .= " {$key}";
-                } elseif (false !== $value) {
-                    $html .= " {$key}=\"".htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8').'"';
-                }
-            }
-        }
-
-        return $html;
-    }
-
-    /**
      * Retourne les attributs HTML de validation
      */
     protected function getValidationAttributes(): string
@@ -161,7 +139,29 @@ abstract class Field
             $pattern = (string) $this->getRule('regex');
             // Nettoie le pattern en enlevant les délimiteurs regex
             $pattern = preg_replace('#^/|/$#', '', $pattern);
-            $html .= " pattern=\"".htmlspecialchars($pattern, ENT_QUOTES, 'UTF-8').'"';
+            $html .= ' pattern="'.htmlspecialchars($pattern, ENT_QUOTES, 'UTF-8').'"';
+        }
+
+        return $html;
+    }
+
+    /**
+     * Retourne les attributs non-validation
+     */
+    private function getNonValidationAttributes(): string
+    {
+        /** @var array<string> $validationKeys */
+        $validationKeys = ['required', 'email', 'minLength', 'maxLength', 'regex', 'min', 'max', 'match', 'label', 'infos'];
+        $html = '';
+
+        foreach ($this->attributes as $key => $value) {
+            if (!in_array($key, $validationKeys, true)) {
+                if (true === $value) {
+                    $html .= " {$key}";
+                } elseif (false !== $value) {
+                    $html .= " {$key}=\"".htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8').'"';
+                }
+            }
         }
 
         return $html;

@@ -60,7 +60,7 @@ abstract class AbstractRepository
         $data = $this->extractData($entity);
 
         // Exclut l'ID s'il est 0 ou non défini (auto_increment)
-        if (isset($data['id']) && (0 === $data['id'] || '0' === $data['id'] || null === $data['id'])) {
+        if (isset($data['id']) && (0 === $data['id'] || '0' === $data['id'])) {
             unset($data['id']);
         }
 

@@ -71,7 +71,7 @@ final class SessionMiddleware implements MiddlewareInterface
         $isHttps = !empty($_SERVER['HTTPS']) && 'off' !== strtolower($_SERVER['HTTPS']);
         $appEnv = (string) (getenv('APP_ENV') ?: ($_ENV['APP_ENV'] ?? 'prod'));
         $isProduction = 'prod' === $appEnv;
-        
+
         // En production, forcer le flag secure uniquement si HTTPS
         $secureFlag = $isProduction && $isHttps;
 

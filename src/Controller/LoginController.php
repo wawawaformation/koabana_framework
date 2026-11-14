@@ -7,29 +7,27 @@ namespace Koabana\Controller;
 use Koabana\Form\EmailInput;
 use Koabana\Form\Form;
 use Koabana\Form\PasswordInput;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Koabana\Model\Repository\UserRepository;
 use Koabana\View\PhpTemplateRenderer;
 use PHPMailer\PHPMailer\PHPMailer as Mailer;
-use Koabana\Log\LoggerFactory as Logger;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * LoginController
  */
 final class LoginController extends AbstractController
 {
-    private $userRepository;
-    private $mailer;
-    private $logger;
+    private UserRepository $userRepository;
+    private Mailer $mailer;
 
-    public function __construct(PhpTemplateRenderer $view, UserRepository $userRepository, Mailer $mailer, Logger $logger)
+    public function __construct(PhpTemplateRenderer $view, UserRepository $userRepository, Mailer $mailer)
     {
         parent::__construct($view);
         $this->userRepository = $userRepository;
         $this->mailer = $mailer;
-        $this->logger = $logger;
     }
+
     public function login(ServerRequestInterface $request): ResponseInterface
     {
         $form = new Form('login');
@@ -53,8 +51,7 @@ final class LoginController extends AbstractController
         $csrfToken = $request->getAttribute('csrf_token', '');
         $form->setCsrfToken($csrfToken);
 
-        if ("POST" === $request->getMethod()) {
-
+        if ('POST' === $request->getMethod()) {
             $data = $request->getParsedBody() ?? [];
             $form->fill($data);
 
@@ -74,12 +71,12 @@ final class LoginController extends AbstractController
                         }
 
                         $this->addFlash($request, 'success', 'Connexion réussie !');
+
                         return $this->redirect('/mon-espace');
                     }
                 } else {
                     $this->addFlash($request, 'error', 'Email ou mot de passe incorrect.');
                 }
-
             }
         }
 
@@ -93,16 +90,14 @@ final class LoginController extends AbstractController
         $profile = $request->getAttribute('profile');
         $profile->clear();
 
-
         // Redirige vers la page de connexion
         $this->addFlash($request, 'success', 'Déconnexion réussie !');
+
         return $this->redirect('/connexion');
     }
 
-
     public function forgotPassword(ServerRequestInterface $request): ResponseInterface
     {
-
         $form = new Form('login');
 
         $form->add(new EmailInput('email', [
@@ -115,9 +110,7 @@ final class LoginController extends AbstractController
 
         $form->setCsrfToken($request->getAttribute('csrf_token', ''));
 
-
-        if ("POST" === $request->getMethod()) {
-
+        if ('POST' === $request->getMethod()) {
             $data = $request->getParsedBody() ?? [];
             $form->fill($data);
 
@@ -127,12 +120,11 @@ final class LoginController extends AbstractController
                     // Générer un token de réinitialisation
                     $token = bin2hex(random_bytes(16));
                     $user->setToken($token);
-                    $user->setTokenExpiresAt((new \DateTimeImmutable())->modify('+1 hour'));
+                    $user->setTokenExpiresAt(new \DateTimeImmutable()->modify('+1 hour'));
                     $this->userRepository->update($user);
 
-
-                   $baseUrl = $this->getBaseUrl($request);
-                    $resetUrl = $baseUrl . '/reinitialisation-mot-de-passe/' . $token;
+                    $baseUrl = $this->getBaseUrl($request);
+                    $resetUrl = $baseUrl.'/reinitialisation-mot-de-passe/'.$token;
 
                     try {
                         $this->mailer->setFrom('contact@koabana.fr', 'Koabana');
@@ -141,12 +133,12 @@ final class LoginController extends AbstractController
                         $this->mailer->isHTML(true);
 
                         $html = '<p>Vous avez perdu votre mot de passe ?<br> Cliquez sur le lien ci-dessous pour en créer un autre</p>'
-                            . '<p><a href="' . $resetUrl . '">Réinitialiser mon mot de passe</a></p>'
-                            . '<p>Vous pouvez aussi copier-coller ce lien dans votre navigateur : ' . $resetUrl . '</p>'
-                            . '<p>Si vous n\'avez pas demandé de réinitialisation, ignorez simplement cet email.</p>';
+                            .'<p><a href="'.$resetUrl.'">Réinitialiser mon mot de passe</a></p>'
+                            .'<p>Vous pouvez aussi copier-coller ce lien dans votre navigateur : '.$resetUrl.'</p>'
+                            .'<p>Si vous n\'avez pas demandé de réinitialisation, ignorez simplement cet email.</p>';
 
-                        $altBody = "Vous avez perdu votre mot de passe ?\n\n Cliquez sur le lien ci-dessous pour en créer un autre :\n\n " . $resetUrl . "\n\n 
-                        Vous pouvez aussi copier-coller ce lien dans votre navigateur : " . $resetUrl . "\n\n
+                        $altBody = "Vous avez perdu votre mot de passe ?\n\n Cliquez sur le lien ci-dessous pour en créer un autre :\n\n ".$resetUrl."\n\n 
+                        Vous pouvez aussi copier-coller ce lien dans votre navigateur : ".$resetUrl."\n\n
                         Si vous n'avez pas demandé de réinitialisation, ignorez simplement cet email.";
 
                         $this->mailer->Body = $html;
@@ -154,12 +146,13 @@ final class LoginController extends AbstractController
                         $this->mailer->send();
 
                         $this->addFlash($request, 'success', 'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.');
-                        return $this->redirect('/connexion');
 
+                        return $this->redirect('/connexion');
                     } catch (\Exception $e) {
                         // Gérer l'erreur d'envoi d'email
 
                         $this->addFlash($request, 'error', 'Erreur lors de l\'envoi de l\'email de réinitialisation.');
+
                         return $this->redirect('/connexion');
                     }
 
@@ -167,9 +160,8 @@ final class LoginController extends AbstractController
                     // sendPasswordResetEmail($user->getEmail(), $token);
                 }
 
-
-
                 $this->addFlash($request, 'success', 'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.');
+
                 return $this->redirect('/connexion');
             }
         }
@@ -179,23 +171,23 @@ final class LoginController extends AbstractController
         ]);
     }
 
+    /**
+     * @param array<string, string> $args
+     */
     public function resetPassword(ServerRequestInterface $request, array $args): ResponseInterface
     {
         $token = $args['token'] ?? '';
         $user = $this->userRepository->findByToken(strip_tags($token));
 
         if (!$user || $user->getTokenExpiresAt() < new \DateTimeImmutable()) {
-
             if ($user) {
                 $user->setToken(null)->setTokenExpiresAt(null);
                 $this->userRepository->update($user);
             }
             $this->addFlash($request, 'error', 'Lien de réinitialisation invalide ou expiré. Veuillez recommencer la réinitialisation.');
 
-
             return $this->redirect('/mot-de-passe-oublie');
         }
-
 
         $form = new Form('reset_password');
         $form->add(new PasswordInput('password', [
@@ -213,30 +205,29 @@ final class LoginController extends AbstractController
 
         $form->setCsrfToken($request->getAttribute('csrf_token', ''));
 
-        if("POST" === $request->getMethod()) {
+        if ('POST' === $request->getMethod()) {
             $data = $request->getParsedBody() ?? [];
             $form->fill($data);
 
-            if($form->Validate()) {
+            if ($form->Validate()) {
                 // on verifie que les deux champs de mot de passe correspondent
-                if($data['password'] !== $data['confirmation']) {
+                if ($data['password'] !== $data['confirmation']) {
                     $this->addFieldError(
-                        $request, 
-                        $form, 'confirmation',
-                         'Le mot de passe de confirmation ne correspond pas.');
-                         
-                   
-                }else{
+                        $request,
+                        $form,
+                        'confirmation',
+                        'Le mot de passe de confirmation ne correspond pas.',
+                    );
+                } else {
+                    $user->setPasswordHash(password_hash($data['password'], PASSWORD_DEFAULT));
+                    $user->setToken(null)->setTokenExpiresAt(null);
+                    $this->userRepository->update($user);
 
-                $user->setPasswordHash(password_hash($data['password'], PASSWORD_DEFAULT));
-                $user->setToken(null)->setTokenExpiresAt(null);
-                $this->userRepository->update($user);
+                    $this->addFlash($request, 'success', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.');
 
-                $this->addFlash($request, 'success', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.');
-                return $this->redirect('/connexion');
-// on efface le token et sa date d'expiration $user->setToken(null)->setTokenExpiresAt(null); // on met à jour le mot de passe $user->setPassword(password_hash($data['password'], PASSWORD_DEFAULT)); $this->userRepository->update($user); $this->addFlash($request, 'success', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.'); return $this->redirect('/connexion'); }$user->setToken(null)->setTokenExpiresAt(null); $user->set
+                    return $this->redirect('/connexion');
+                    // on efface le token et sa date d'expiration $user->setToken(null)->setTokenExpiresAt(null); // on met à jour le mot de passe $user->setPassword(password_hash($data['password'], PASSWORD_DEFAULT)); $this->userRepository->update($user); $this->addFlash($request, 'success', 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.'); return $this->redirect('/connexion'); }$user->setToken(null)->setTokenExpiresAt(null); $user->set
                 }
-
             }
         }
 
@@ -246,9 +237,8 @@ final class LoginController extends AbstractController
             [
                 'form' => $form,
                 'userId' => $user->getId(),
-                'urlForm' => $this->getBaseUrl($request) . '/reinitialisation-mot-de-passe/' . $token,
-            ]
+                'urlForm' => $this->getBaseUrl($request).'/reinitialisation-mot-de-passe/'.$token,
+            ],
         );
-
     }
 }

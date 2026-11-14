@@ -7,7 +7,7 @@ namespace Tests\Unit;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use Koabana\Http\Middleware\SecurityHeadersMiddleware;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Server\RequestHandlerInterface;
 
@@ -25,8 +25,8 @@ final class SecurityHeadersMiddlewareTest extends TestCase
     {
         $this->middleware = new SecurityHeadersMiddleware();
 
-        /** @var MockObject&RequestHandlerInterface */
-        $handler = $this->createMock(RequestHandlerInterface::class);
+        /** @var RequestHandlerInterface&Stub */
+        $handler = $this->createStub(RequestHandlerInterface::class);
         $handler->method('handle')->willReturn(new Response(200, [], 'OK'));
         $this->handler = $handler;
     }

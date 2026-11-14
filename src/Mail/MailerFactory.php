@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Koabana\Mail;
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
 
 /**
  * Fabrique d'instances PHPMailer configurees via variables d'environnement.

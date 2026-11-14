@@ -68,7 +68,8 @@ final class SecurityHeadersMiddleware implements MiddlewareInterface
         // Masquer les informations de version du serveur et de PHP
         $response = $response
             ->withoutHeader('X-Powered-By')
-            ->withHeader('Server', 'Apache');
+            ->withHeader('Server', 'Apache')
+        ;
 
         return $response;
     }

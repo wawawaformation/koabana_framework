@@ -10,7 +10,7 @@ class TextInput extends Field
     {
         $value = htmlspecialchars((string) $this->value, ENT_QUOTES, 'UTF-8');
         $attributes = $this->getHtmlAttributes();
-        
+
         // Détermine le type en fonction des règles
         $type = 'text';
         if ($this->hasRule('email')) {

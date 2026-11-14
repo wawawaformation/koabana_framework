@@ -8,7 +8,7 @@ use GuzzleHttp\Psr7\ServerRequest;
 use Koabana\Controller\DemoController;
 use Koabana\Database\BDDFactory;
 use Koabana\Model\Repository\DemoRepository;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -25,12 +25,12 @@ final class DemoControllerTest extends TestCase
 
     protected function setUp(): void
     {
-        /** @var BDDFactory&MockObject */
-        $bddFactory = $this->createMock(BDDFactory::class);
+        /** @var BDDFactory&Stub */
+        $bddFactory = $this->createStub(BDDFactory::class);
         $this->repository = new DemoRepository($bddFactory);
 
-        /** @var LoggerInterface&MockObject */
-        $logger = $this->createMock(LoggerInterface::class);
+        /** @var LoggerInterface&Stub */
+        $logger = $this->createStub(LoggerInterface::class);
         $this->logger = $logger;
         $this->controller = new DemoController($this->repository, $this->logger);
     }

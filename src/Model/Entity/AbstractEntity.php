@@ -21,7 +21,7 @@ abstract class AbstractEntity
     /**
      * Retourne l'ID de l'entité
      *
-     * @return int|null L'identifiant ou null si non défini (entité non persistée)
+     * @return null|int L'identifiant ou null si non défini (entité non persistée)
      */
     public function getId(): ?int
     {
@@ -118,7 +118,6 @@ abstract class AbstractEntity
         $reflection = new \ReflectionObject($this);
 
         foreach ($reflection->getProperties() as $property) {
-            $property->setAccessible(true);
             if (!$property->isInitialized($this)) {
                 continue;
             }

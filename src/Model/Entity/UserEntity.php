@@ -6,11 +6,10 @@ namespace Koabana\Model\Entity;
 
 /**
  * Entité représentant un utilisateur du système.
- * 
+ *
  * Cette entité gère les informations d'un utilisateur, incluant ses données personnelles,
  * son mot de passe hashé et son token d'activation de compte.
  *
- * @package Koabana\Model\Entity
  * @author  Koabana Lab
  */
 final class UserEntity extends AbstractEntity
@@ -40,10 +39,9 @@ final class UserEntity extends AbstractEntity
      * Hash du mot de passe de l'utilisateur.
      * Null si le compte n'est pas encore activé.
      *
-     * @var string|null
+     * @var null|string
      */
     private ?string $passwordHash = null;
-
 
     /**
      * Indique si le compte de l'utilisateur est actif (activé) ou non.
@@ -52,13 +50,12 @@ final class UserEntity extends AbstractEntity
      */
     private bool $isActive = false;
 
-
-
     /**
      * Token de confirmation pour l'activation du compte.
      * Null si le compte est déjà activé.
      *œ
-     * @var string|null
+     *
+     * @var null|string
      */
     private ?string $token = null;
 
@@ -66,7 +63,7 @@ final class UserEntity extends AbstractEntity
      * Date d'expiration du token d'activation.
      * Null si le compte est déjà activé ou si aucun token n'a été généré.
      *
-     * @var \DateTimeImmutable|null
+     * @var null|\DateTimeImmutable
      */
     private ?\DateTimeImmutable $tokenExpiresAt = null;
 
@@ -103,13 +100,12 @@ final class UserEntity extends AbstractEntity
     /**
      * Retourne le hash du mot de passe de l'utilisateur.
      *
-     * @return string|null Le hash du mot de passe ou null si non défini
+     * @return null|string Le hash du mot de passe ou null si non défini
      */
     public function getPasswordHash(): ?string
     {
         return $this->passwordHash;
     }
-
 
     /**
      * Indique si le compte de l'utilisateur est actif (activé) ou non.
@@ -124,7 +120,7 @@ final class UserEntity extends AbstractEntity
     /**
      * Retourne le token d'activation du compte.
      *
-     * @return string|null Le token d'activation ou null si non défini
+     * @return null|string Le token d'activation ou null si non défini
      */
     public function getToken(): ?string
     {
@@ -134,7 +130,7 @@ final class UserEntity extends AbstractEntity
     /**
      * Retourne la date d'expiration du token d'activation.
      *
-     * @return \DateTimeImmutable|null La date d'expiration ou null si non définie
+     * @return null|\DateTimeImmutable La date d'expiration ou null si non définie
      */
     public function getTokenExpiresAt(): ?\DateTimeImmutable
     {
@@ -156,6 +152,7 @@ final class UserEntity extends AbstractEntity
             throw new \InvalidArgumentException('Le prénom ne peut pas être vide');
         }
         $this->firstname = $firstname;
+
         return $this;
     }
 
@@ -174,6 +171,7 @@ final class UserEntity extends AbstractEntity
             throw new \InvalidArgumentException('Le nom ne peut pas être vide');
         }
         $this->lastname = $lastname;
+
         return $this;
     }
 
@@ -192,22 +190,23 @@ final class UserEntity extends AbstractEntity
             throw new \InvalidArgumentException('L\'email ne peut pas être vide');
         }
         $this->email = $email;
+
         return $this;
     }
 
     /**
      * Définit le hash du mot de passe de l'utilisateur.
      *
-     * @param string|null $passwordHash Le hash du mot de passe ou null pour un compte non activé
+     * @param null|string $passwordHash Le hash du mot de passe ou null pour un compte non activé
      *
      * @return self L'instance courante pour le chaînage
      */
     public function setPasswordHash(?string $passwordHash): self
     {
         $this->passwordHash = $passwordHash;
+
         return $this;
     }
-
 
     /**
      * Définit si le compte de l'utilisateur est actif (activé) ou non.
@@ -219,32 +218,35 @@ final class UserEntity extends AbstractEntity
     public function setIsActive(bool $isActive): self
     {
         $this->isActive = $isActive;
+
         return $this;
     }
 
     /**
      * Définit le token d'activation du compte.
      *
-     * @param string|null $token Le token d'activation ou null si le compte est activé
+     * @param null|string $token Le token d'activation ou null si le compte est activé
      *
      * @return self L'instance courante pour le chaînage
      */
     public function setToken(?string $token): self
     {
         $this->token = $token;
+
         return $this;
     }
 
     /**
      * Définit la date d'expiration du token d'activation.
      *
-     * @param \DateTimeImmutable|null $tokenExpiresAt La date d'expiration ou null
+     * @param null|\DateTimeImmutable $tokenExpiresAt La date d'expiration ou null
      *
      * @return self L'instance courante pour le chaînage
      */
     public function setTokenExpiresAt(?\DateTimeImmutable $tokenExpiresAt): self
     {
         $this->tokenExpiresAt = $tokenExpiresAt;
+
         return $this;
     }
 }

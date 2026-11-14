@@ -79,6 +79,7 @@ final class ProfileBagTest extends TestCase
     {
         $data = [
             'user_id' => 1,
+            'user_lastname' => 'Martin',
             'user_firstname' => 'Bob',
             'user_email' => 'bob@example.com',
         ];

@@ -8,7 +8,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use Koabana\Http\Middleware\CsrfMiddleware;
 use Koabana\Http\Session\SessionBag;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Server\RequestHandlerInterface;
 
@@ -31,8 +31,8 @@ final class CsrfMiddlewareTest extends TestCase
         $this->middleware = new CsrfMiddleware(['/api/*']);
         $this->session = new SessionBag($this->sessionData);
 
-        /** @var MockObject&RequestHandlerInterface */
-        $handler = $this->createMock(RequestHandlerInterface::class);
+        /** @var RequestHandlerInterface&Stub */
+        $handler = $this->createStub(RequestHandlerInterface::class);
         $handler->method('handle')->willReturn(new Response(200, [], 'OK'));
         $this->handler = $handler;
     }

@@ -1,6 +1,5 @@
 <?php
 
-
 declare(strict_types=1);
 
 namespace Koabana\Controller;
@@ -21,17 +20,17 @@ final class DashboardController extends AbstractController
 
     public function index(ServerRequestInterface $request): ResponseInterface
     {
-        if(!$this->isLogged($request)) {
-            $this->addFlash($request, "warning","Vous devez être connecté pour accéder au tableau de bord.");
+        if (!$this->isLogged($request)) {
+            $this->addFlash($request, 'warning', 'Vous devez être connecté pour accéder au tableau de bord.');
+
             return $this->redirect('/connexion');
-        }   
+        }
 
         $profile = $this->getUserProfile($request);
-       
+
         return $this->render(
             $request,
-            "dashboard/index",
-            
+            'dashboard/index',
         );
     }
 }

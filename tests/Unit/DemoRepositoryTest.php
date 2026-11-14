@@ -19,7 +19,7 @@ final class DemoRepositoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $bddFactory = $this->createMock(BDDFactory::class);
+        $bddFactory = $this->createStub(BDDFactory::class);
         $this->repository = new DemoRepository($bddFactory);
     }
 
